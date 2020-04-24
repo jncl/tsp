@@ -1,4 +1,4 @@
-# vim: set ts=4 sts=4 sw=4 et tw=0:
+# vim: set ts=4 sts=4 sw=4 et tw=0 fileencoding=utf-8:
 
 from __future__ import print_function
 
@@ -46,36 +46,28 @@ def do_list_failed():
     with Database() as db:
         tasks = db.list_failed_tasks()
 
-    if not tasks:
-        print('No failed tasks.')
-
-    else:
-        for t in tasks:
-            print('%d %s' % (t[0], t[1]))
+    print_task_list(tasks, 'Failed tasks:', 'No failed tasks.')
 
 
 def do_list_finished():
     with Database() as db:
         tasks = db.list_finished_tasks()
 
-    if not tasks:
-        print('No finished tasks.')
+    print_task_list(tasks, 'Finished tasks:', 'No finished tasks.')
 
-    else:
-        for t in tasks:
-            print('%d %s' % (t[0], t[1]))
+
+def do_list_last():
+    with Database() as db:
+        tasks = db.list_last_tasks()
+
+    print_task_list(tasks, 'Recent tasks:', 'No recent tasks.')
 
 
 def do_list_pending():
     with Database() as db:
         tasks = db.list_pending_tasks()
 
-    if not tasks:
-        print('No pending tasks.')
-
-    else:
-        for t in tasks:
-            print('%d %s' % (t[0], t[1]))
+    print_task_list(tasks, 'Pending tasks:', 'No pending tasks.')
 
 
 def do_purge():
@@ -124,8 +116,44 @@ def do_run():
         db.commit()
 
 
+def do_show(task_id):
+    with Database() as db:
+        task = db.get_task(int(task_id))
+
+    date_fmt = '%Y-%m-%d %H:%M:%S'
+
+    print('task id    : %d' % task['id'])
+    print('added at   : %s' % time.strftime(date_fmt, time.localtime(task['added_at'])))
+
+    if task['run_at']:
+        print('run at     : %s' % time.strftime(date_fmt, time.localtime(task['run_at'])))
+    else:
+        print('run at     : never')
+
+    if task['finished_at']:
+        print('finished at: %s' % time.strftime(date_fmt, time.localtime(task['finished_at'])))
+    else:
+        print('finished at: never')
+
+    print('command    : %s' % task['command'])
+
+    print('result     : %d' % task['result'])
+
+    if not task['stdout']:
+        print('stdout     : empty')
+
+    if not task['stderr']:
+        print('stderr     : empty')
+
+    if task['stdout']:
+        print("\n--- stdout ---\n\n%s\n" % task['stdout'].encode('utf-8').rstrip())
+
+    if task['stderr']:
+        print("\n--- stderr ---\n\n%s\n" % task['stderr'].encode('utf-8').rstrip())
+
+
 def main():
-    action = 'help'
+    action = None
     replace = False
     command = None
 
@@ -145,16 +173,49 @@ def main():
             continue
         elif arg == '--run':
             return do_run()
+        elif arg == '--show':
+            action = 'show'
         elif arg.startswith('--'):
             return do_help()
         else:
             command = sys.argv[idx+1:]
-            action = 'add'
+            if action is None:
+                action = 'add'
 
     if action == 'add':
         do_add(replace, command)
+    elif action == 'show':
+        do_show(command[0])
     else:
-        do_help()
+        do_list_last()
+
+
+def print_task_list(tasks, header, no_header):
+    if not tasks:
+        print(no_header)
+
+    else:
+        print('--- %s ---' % header)
+        print('   id  date   time   dur  res command')
+        print('----- ------ ------ ---- ---- -----------------')
+        for t in tasks:
+            ts = time.strftime('%d.%m  %H:%M', time.localtime(t['finished_at']))
+
+            if t['status'] == 0:
+                mark = '-'
+            elif t['status'] == 1:
+                mark = '*'
+            elif t['result'] == 0:
+                mark = u'✓'
+            else:
+                mark = 'x'
+
+            if t['finished_at']:
+                dur = t['finished_at'] - t['run_at']
+            else:
+                dur = 0
+
+            print('%5d  %s  %3u  %s   %s' % (t['id'], ts, dur, mark, t['command']))
 
 
 def run_command(command):

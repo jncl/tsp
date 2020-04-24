@@ -24,7 +24,7 @@ BOOTSTRAP = [
 DB_PATH = os.path.expanduser('~/.local/share/tsp/tasks.db')
 
 
-class Database(object):
+class DAL(object):
     def __del__(self):
         self.rollback()
 
@@ -42,18 +42,6 @@ class Database(object):
         self.filename = DB_PATH
         self.db = self.connect()
         self.bootstrap()
-
-    def add_task(self, command):
-        if not isinstance(command, (list, tuple)):
-            raise ValueError('task command must be list of arguments')
-
-        command = self.shell_escape(command)
-
-        return self.insert('tasks', {
-            'added_at': int(time.time()),
-            'command': command,
-            'status': 0,
-        })
 
     def begin_transaction(self):
         self.query('BEGIN TRANSACTION')
@@ -74,18 +62,6 @@ class Database(object):
         db.isolation_level = None
         return db
 
-    def get_next_task(self):
-        rows = self.query('SELECT id, command FROM tasks WHERE status = 0 ORDER BY id LIMIT 1')
-        if not rows:
-            return None
-
-        row = rows[0]
-
-        return {
-            'id': int(row[0]),
-            'command': row[1].encode('utf-8'),
-        }
-
     def insert(self, table, props):
         fields = []
         marks = []
@@ -101,14 +77,95 @@ class Database(object):
         query = 'INSERT INTO `%s` (%s) VALUES (%s)' % (table, csep(fields), csep(marks))
         return self.query(query, params)
 
+    def query(self, query, params=None):
+        cur = self.db.cursor()
+
+        args = [query]
+        if params is not None:
+            args.append(params)
+
+        try:
+            cur.execute(*args)
+            if query.startswith('SELECT '):
+                rows = cur.fetchall()
+                names = [desc[0] for desc in cur.description]
+                return [dict(zip(names, row)) for row in rows]
+            elif query.startswith('INSERT '):
+                return cur.lastrowid
+            else:
+                return cur.rowcount
+
+        except:
+            self.log_exception('failed SQL statement: %s, params: %s' % (query, params))
+            raise
+
+        finally:
+            cur.close()
+
+    def rollback(self):
+        self.db.rollback()
+
+    def update(self, table, props, conditions):
+        parts = []
+        params = []
+        where = []
+
+        for k, v in props.items():
+            parts.append(k + ' = ?')
+            params.append(v)
+
+        if conditions:
+            for k, v in conditions.items():
+                where.append(k + ' = ?')
+                params.append(v)
+
+        query = 'UPDATE `%s` SET %s' % (table, ', '.join(parts))
+        if where:
+            query += ' WHERE %s' % ' AND '.join(where)
+
+        return self.query(query, params)
+
+
+class Database(DAL):
+    def add_task(self, command):
+        if not isinstance(command, (list, tuple)):
+            raise ValueError('task command must be list of arguments')
+
+        command = self.shell_escape(command)
+
+        return self.insert('tasks', {
+            'added_at': int(time.time()),
+            'command': command,
+            'status': 0,
+        })
+
+    def get_next_task(self):
+        rows = self.query('SELECT id, command FROM tasks WHERE status = 0 ORDER BY id LIMIT 1')
+        if not rows:
+            return None
+
+        row = rows[0]
+
+        return {
+            'id': int(row[0]),
+            'command': row[1].encode('utf-8'),
+        }
+
+    def get_task(self, task_id):
+        rows = self.query('SELECT * FROM tasks WHERE id = ?', [task_id])
+        return rows[0] if rows else None
+
     def list_failed_tasks(self):
-        return self.query('SELECT id, command FROM tasks WHERE status = 2 AND result <> 0 ORDER BY id')
+        return self.query('SELECT id, run_at, added_at, finished_at, command, status, result FROM tasks WHERE status = 2 AND result <> 0 ORDER BY id')
 
     def list_finished_tasks(self):
-        return self.query('SELECT id, command FROM tasks WHERE status = 2 ORDER BY id')
+        return self.query('SELECT id, run_at, added_at, finished_at, command, status, result FROM tasks WHERE status = 2 AND result = 0 ORDER BY id')
+
+    def list_last_tasks(self):
+        return reversed(self.query('SELECT id, run_at, added_at, finished_at, command, status, result FROM tasks ORDER BY id DESC LIMIT 20'))
 
     def list_pending_tasks(self):
-        return self.query('SELECT id, command FROM tasks WHERE status = 0 ORDER BY id')
+        return self.query('SELECT id, run_at, added_at, finished_at, command, status, result FROM tasks WHERE status = 0 ORDER BY id')
 
     def log_exception(self, msg):
         print(msg, file=sys.stderr)
@@ -122,29 +179,6 @@ class Database(object):
     def purge_pending(self):
         return self.query('DELETE FROM tasks WHERE status = 0')
 
-    def query(self, query, params=None):
-        cur = self.db.cursor()
-
-        args = [query]
-        if params is not None:
-            args.append(params)
-
-        try:
-            cur.execute(*args)
-            if query.startswith('SELECT '):
-                return cur.fetchall()
-            elif query.startswith('INSERT '):
-                return cur.lastrowid
-            else:
-                return cur.rowcount
-
-        except:
-            self.log_exception('failed SQL statement: %s, params: %s' % (query, params))
-            raise
-
-        finally:
-            cur.close()
-
     def replace_task(self, command):
         self.query('DELETE FROM tasks WHERE status = 0 AND command = ?', [command])
         return self.add_task(command)
@@ -152,9 +186,6 @@ class Database(object):
     def reset_running(self):
         # TODO: email about unfinished tasks.
         self.query('UPDATE tasks SET status = 0 WHERE status = 1')
-
-    def rollback(self):
-        self.db.rollback()
 
     def set_failed(self, task_id, msg):
         if not isinstance(task_id, int):
@@ -200,23 +231,3 @@ class Database(object):
         escape = lambda s: s if ' ' not in s else '"%s"' % s
         args = [escape(arg) for arg in args]
         return ' '.join(args)
-
-    def update(self, table, props, conditions):
-        parts = []
-        params = []
-        where = []
-
-        for k, v in props.items():
-            parts.append(k + ' = ?')
-            params.append(v)
-
-        if conditions:
-            for k, v in conditions.items():
-                where.append(k + ' = ?')
-                params.append(v)
-
-        query = 'UPDATE `%s` SET %s' % (table, ', '.join(parts))
-        if where:
-            query += ' WHERE %s' % ' AND '.join(where)
-
-        return self.query(query, params)
