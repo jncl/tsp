@@ -26,6 +26,15 @@ tsp --run              -- run the daemon.
 """
 
 
+def calc_times(then):
+    now = os.times()
+
+    utime = now[0] - then[0]
+    stime = now[1] - then[1]
+    rtime = now[4] - then[4]
+
+    return rtime, utime, stime
+
 def do_add(replace, command):
     if command is None:
         print('Command not specified.', file=sys.stderr)
@@ -103,14 +112,18 @@ def do_run():
 
         print('Running task %d: %s' % (int(task['id']), task['command']))
 
+        times = os.times()
+
         db.set_running(int(task['id']))
         db.commit()
 
         try:
             rc, out, err = run_command(task['command'])
-            db.set_finished(int(task['id']), rc, out, err)
+            rtime, utime, stime = calc_times(times)
+            db.set_finished(int(task['id']), rc, out, err, rtime, utime, stime)
         except Exception, e:
-            db.set_failed(int(task['id']), str(e))
+            rtime, utime, stime = calc_times(times)
+            db.set_failed(int(task['id']), str(e), rtime, utime, stime)
             print('Task %d failed.' % int(task['id']))
 
         db.commit()
@@ -138,6 +151,13 @@ def do_show(task_id):
     print('command    : %s' % task['command'])
 
     print('result     : %d' % task['result'])
+
+    if task['time_r']:
+        print('real time  : %.2f' % task['time_r'])
+    if task['time_u']:
+        print('user time  : %.2f' % task['time_u'])
+    if task['time_s']:
+        print('sys time   : %.2f' % task['time_s'])
 
     if not task['stdout']:
         print('stdout     : empty')
@@ -181,6 +201,7 @@ def main():
             command = sys.argv[idx+1:]
             if action is None:
                 action = 'add'
+            break
 
     if action == 'add':
         do_add(replace, command)

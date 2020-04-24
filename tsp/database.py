@@ -187,7 +187,7 @@ class Database(DAL):
         # TODO: email about unfinished tasks.
         self.query('UPDATE tasks SET status = 0 WHERE status = 1')
 
-    def set_failed(self, task_id, msg):
+    def set_failed(self, task_id, msg, rtime=None, utime=None, stime=None):
         if not isinstance(task_id, int):
             raise ValueError('task_id must be an integer')
 
@@ -198,11 +198,14 @@ class Database(DAL):
             'stderr': msg,
             'result': -1,
             'finished_at': int(time.time()),
+            'time_r': rtime,
+            'time_u': utime,
+            'time_s': stime,
         }, {
             'id': task_id,
         })
 
-    def set_finished(self, task_id, rc, stdout, stderr):
+    def set_finished(self, task_id, rc, stdout, stderr, rtime=None, utime=None, stime=None):
         if not isinstance(task_id, int):
             raise ValueError('task_id must be an integer')
 
@@ -212,6 +215,9 @@ class Database(DAL):
             'stderr': stderr,
             'result': rc,
             'finished_at': int(time.time()),
+            'time_r': rtime,
+            'time_u': utime,
+            'time_s': stime,
         }, {
             'id': task_id,
         })
