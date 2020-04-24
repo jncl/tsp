@@ -162,7 +162,7 @@ class Database(DAL):
         return self.query('SELECT id, run_at, added_at, finished_at, command, status, result FROM tasks WHERE status = 2 AND result = 0 ORDER BY id')
 
     def list_last_tasks(self):
-        return reversed(self.query('SELECT id, run_at, added_at, finished_at, command, status, result FROM tasks ORDER BY id DESC LIMIT 20'))
+        return reversed(self.query('SELECT id, run_at, added_at, finished_at, command, status, result FROM tasks ORDER BY id DESC LIMIT 50'))
 
     def list_pending_tasks(self):
         return self.query('SELECT id, run_at, added_at, finished_at, command, status, result FROM tasks WHERE status = 0 ORDER BY id')
