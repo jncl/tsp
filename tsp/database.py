@@ -141,15 +141,7 @@ class Database(DAL):
 
     def get_next_task(self):
         rows = self.query('SELECT id, command FROM tasks WHERE status = 0 ORDER BY id LIMIT 1')
-        if not rows:
-            return None
-
-        row = rows[0]
-
-        return {
-            'id': int(row[0]),
-            'command': row[1].encode('utf-8'),
-        }
+        return rows[0] if rows else None
 
     def get_task(self, task_id):
         rows = self.query('SELECT * FROM tasks WHERE id = ?', [task_id])
