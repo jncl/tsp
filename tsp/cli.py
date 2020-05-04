@@ -172,6 +172,20 @@ def do_show(task_id):
         print("\n--- stderr ---\n\n%s\n" % task['stderr'].encode('utf-8').rstrip())
 
 
+def find_executable(command):
+    if os.path.exists(command):
+        return command
+
+    base = os.path.basename(command[0])
+
+    for folder in os.getenv('PATH').split(os.path.pathsep):
+        exe = os.path.join(folder, base)
+        if os.path.exists(exe):
+            return exe
+
+    raise RuntimeError('command %s not found' % base)
+
+
 def main():
     action = None
     replace = False
@@ -240,6 +254,7 @@ def print_task_list(tasks, header, no_header):
 
 
 def run_command(command):
+    command[0] = find_executable(command[0])
     p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = p.communicate()
     return p.returncode, out, err
