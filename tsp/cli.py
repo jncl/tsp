@@ -112,6 +112,12 @@ def do_run():
 
         print('Running task %d: %s' % (int(task['id']), task['command']))
 
+        if task['command'] == 'reload':
+            db.set_finished(int(task['id']), 0, None, None)
+            db.commit()
+            print('Reloading.')
+            exit(0)
+
         times = os.times()
 
         db.set_running(int(task['id']))
@@ -124,7 +130,7 @@ def do_run():
         except Exception, e:
             rtime, utime, stime = calc_times(times)
             db.set_failed(int(task['id']), str(e), rtime, utime, stime)
-            print('Task %d failed.' % int(task['id']))
+            print('Task %d failed: %s.' % (int(task['id']), e))
 
         db.commit()
 
@@ -176,7 +182,7 @@ def find_executable(command):
     if os.path.exists(command):
         return command
 
-    base = os.path.basename(command[0])
+    base = os.path.basename(command)
 
     for folder in os.getenv('PATH').split(os.path.pathsep):
         exe = os.path.join(folder, base)
@@ -254,6 +260,7 @@ def print_task_list(tasks, header, no_header):
 
 
 def run_command(command):
+    command = command.split()
     command[0] = find_executable(command[0])
     p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = p.communicate()
