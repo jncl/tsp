@@ -251,7 +251,7 @@ def print_task_list(tasks, header, no_header):
             else:
                 mark = 'x'
 
-            if t['finished_at']:
+            if t['finished_at'] and t['run_at']:
                 dur = t['finished_at'] - t['run_at']
             else:
                 dur = 0
