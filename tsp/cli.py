@@ -156,7 +156,10 @@ def do_show(task_id):
 
     print('command    : %s' % task['command'])
 
-    print('result     : %d' % task['result'])
+    if task['result'] is not None:
+        print('result     : %d' % task['result'])
+    else:
+        print('result     : none')
 
     if task['time_r']:
         print('real time  : %.2f' % task['time_r'])
