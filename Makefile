@@ -1,5 +1,5 @@
 install: dist
-	pip install dist/tsp-1.0-py2-none-any.whl
+	pip install --upgrade dist/tsp-1.0-py2-none-any.whl
 	tsp reload
 
 dist:
