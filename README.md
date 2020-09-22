@@ -21,6 +21,28 @@ See single task details:
 ![tsp show output](https://storage.yandexcloud.net/umonkey-land/tsp-show.png)
 
 
+## Systemd service setup
+
+Create a file named `/usr/lib/systemd/system/tsp.service` with the following contents (change the user name accordingly):
+
+```
+[Unit]
+Description=Task spooler for ~hex
+
+[Service]
+Type=simple
+ExecStart=/home/hex/.local/bin/tsp --run
+Restart=always
+RestartSec=5s
+User=hex
+Group=hex
+After=syslog.target
+
+[Install]
+WantedBy=multi-user.target
+```
+
+
 ## Prior art
 
 This is my remake of [ts](https://vicerveza.homeunix.net/~viric/soft/ts/), which is great!  But it has some problems which I didn't like and wanted fixed.
