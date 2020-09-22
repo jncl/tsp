@@ -127,6 +127,7 @@ def do_run():
             rc, out, err = run_command(task['command'])
             rtime, utime, stime = calc_times(times)
             db.set_finished(int(task['id']), rc, out, err, rtime, utime, stime)
+            print('Task %d finished.' % int(task['id']))
         except Exception, e:
             rtime, utime, stime = calc_times(times)
             db.set_failed(int(task['id']), str(e), rtime, utime, stime)
@@ -175,10 +176,12 @@ def do_show(task_id):
         print('stderr     : empty')
 
     if task['stdout']:
-        print("\n--- stdout ---\n\n%s\n" % task['stdout'].encode('utf-8').rstrip())
+        stdout = str(task['stdout'])
+        print("\n--- stdout ---\n\n%s\n" % stdout.rstrip())
 
     if task['stderr']:
-        print("\n--- stderr ---\n\n%s\n" % task['stderr'].encode('utf-8').rstrip())
+        stderr = str(task['stderr'])
+        print("\n--- stderr ---\n\n%s\n" % stderr.rstrip())
 
 
 def find_executable(command):

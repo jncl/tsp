@@ -60,6 +60,7 @@ class DAL(object):
 
         db = sqlite.connect(self.filename)
         db.isolation_level = None
+        db.text_factory = str
         return db
 
     def insert(self, table, props):
@@ -187,7 +188,7 @@ class Database(DAL):
 
         return self.update('tasks', {
             'status': 2,
-            'stderr': msg,
+            'stderr': buffer(msg),
             'result': -1,
             'finished_at': int(time.time()),
             'time_r': rtime,
@@ -203,8 +204,8 @@ class Database(DAL):
 
         return self.update('tasks', {
             'status': 2,
-            'stdout': stdout,
-            'stderr': stderr,
+            'stdout': buffer(stdout) if stdout else None,
+            'stderr': buffer(stderr) if stderr else None,
             'result': rc,
             'finished_at': int(time.time()),
             'time_r': rtime,
