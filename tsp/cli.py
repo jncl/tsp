@@ -9,7 +9,7 @@ import subprocess
 import sys
 import time
 
-from database import Database
+from tsp.database import Database
 
 
 USAGE = """Task spooler.  Serializes background process execution.
@@ -90,7 +90,7 @@ def do_run():
         lock = os.path.expanduser('~/.cache/tsp.lock')
         flock = open(lock, 'w')
         fcntl.lockf(flock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-    except IOError, e:
+    except IOError as e:
         if e.errno == errno.EAGAIN:
             print('tsp daemon is already running', file=sys.stderr)
             exit(1)
@@ -128,7 +128,7 @@ def do_run():
             rtime, utime, stime = calc_times(times)
             db.set_finished(int(task['id']), rc, out, err, rtime, utime, stime)
             print('Task %d finished.' % int(task['id']))
-        except Exception, e:
+        except Exception as e:
             rtime, utime, stime = calc_times(times)
             db.set_failed(int(task['id']), str(e), rtime, utime, stime)
             print('Task %d failed: %s.' % (int(task['id']), e))

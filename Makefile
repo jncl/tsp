@@ -4,7 +4,7 @@ install: dist
 
 dist:
 	rm -rf dist
-	python setup.py sdist bdist_wheel
+	python -m build`
 	rm -rf tsp.egg-info build
 	ls -ldh dist/tsp-*
 
