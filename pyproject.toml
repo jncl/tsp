@@ -12,6 +12,7 @@ authors = [
 description = "Task spooler using sqlite db"
 readme = "README.md"
 requires-python = ">=3.9"
+keywords = ["tasks", "sqlite"]
 classifiers = [
   	"Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
