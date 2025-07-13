@@ -18,5 +18,5 @@ setup(name="tsp",
       long_description="Inspired by ts",
       classifiers=["Intended Audience :: Developers"],
       keywords="tasks",
-      license="Public Domain",
+      license="CC-PDM-1.0",
       install_requires=REQUIRES)
