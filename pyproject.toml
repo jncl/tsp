@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools >= 77.0.3"]
+requires = ["setuptools >= 77.0.3", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "tsp"
-version = "2.0"
+dynamic = ["version"]
 authors = [
   { name="Justin Forest", email="hex@umonkey.net" },
   { name="Jon Hogg", email="hogg.jon@gmail.com" },
