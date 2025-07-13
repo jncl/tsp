@@ -203,17 +203,17 @@ class Database(DAL):
     def reset_running(self):
         """ reset running tasks """
         self.query('UPDATE tasks SET status = 0 WHERE status = 1')
-        emsg = Email()
-        emsg.sendmail("Running Tasks reset",\
-                 "All running tasks were reset, please check them and re-run as necessary")
+        em = Email()
+        em.send_mail("Running Tasks reset",\
+                    "All running tasks were reset, please check them and re-run as necessary")
 
     def set_failed(self, task_id, msg, ctime):
         """ set status to failed """
         if not isinstance(task_id, int):
             raise ValueError('task_id must be an integer')
 
-        emsg = Email()
-        emsg.sendmail("Task Failed", f"Task id: {task_id}\n\nMessage:\n{memoryview(msg)}")
+        em = Email()
+        em.send_mail("Task Failed", f"Task id: {task_id}\n\nMessage:\n{memoryview(msg)}")
 
         return self.update('tasks', {
             'status': 2,

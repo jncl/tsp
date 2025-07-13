@@ -30,12 +30,12 @@ tsp --run              -- run the daemon.
 class CalcTimes:
     """ Calculated Times """
     @staticmethod
-    def getnone():
+    def get_none():
         """ used for no-op """
         return None, None, None
 
     @staticmethod
-    def getelapsed(then):
+    def get_elapsed(then):
         """ get elapsed times """
         now = os.times()
         utime = now[0] - then[0]
@@ -47,7 +47,7 @@ class CalcTimes:
 class CmdOutput:
     """ Command return values """
     @staticmethod
-    def getresult(returncode, output, error):
+    def get_result(returncode, output, error):
         """ return params """
         return returncode, output, error
 
@@ -138,8 +138,8 @@ def do_run():
         print(f'Running task {int(task['id'])}: {task['command']}')
 
         if task['command'] == 'reload':
-            db.set_finished(int(task['id']), CmdOutput.getresult(0, None, None),\
-                            CalcTimes.getnone())
+            db.set_finished(int(task['id']), CmdOutput.get_result(0, None, None),\
+                            CalcTimes.get_none())
             db.commit()
             print('Reloading.')
             sys.exit(0)
@@ -151,10 +151,10 @@ def do_run():
 
         try:
             db.set_finished(int(task['id']), run_command(task['command']),\
-                            CalcTimes.getelapsed(times))
+                            CalcTimes.get_elapsed(times))
             print(f'Task {int(task['id'])} finished.')
         except (ValueError, sqlite3.Error) as e:
-            db.set_failed(int(task['id']), str(e), CalcTimes.getelapsed(times))
+            db.set_failed(int(task['id']), str(e), CalcTimes.get_elapsed(times))
             print(f'Task {int(task['id'])} failed: {e}.')
 
         db.commit()
@@ -274,4 +274,4 @@ def run_command(command):
     command = command.split()
     command[0] = find_executable(command[0])
     with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as p:
-        return CmdOutput.getresult(p.returncode, *(p.communicate()))
+        return CmdOutput.get_result(p.returncode, *(p.communicate()))

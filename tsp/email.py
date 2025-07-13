@@ -17,7 +17,7 @@ class Email:
     	# Create the container email message.
         self.msg = EmailMessage()
 
-    def sendmail(self, subject, body):
+    def send_mail(self, subject, body):
         """ send an email """
 
         self.msg['Subject'] = subject
