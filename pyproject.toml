@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools >= 77.0.3", "setuptools-scm"]
+requires = [ "setuptools >= 77.0.3", "setuptools-scm" ]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "tsp"
-dynamic = ["version"]
+dynamic = [ "version" ]
 authors = [
   { name="Justin Forest", email="hex@umonkey.net" },
   { name="Jon Hogg", email="hogg.jon@gmail.com" },
@@ -12,15 +12,14 @@ authors = [
 description = "Task spooler using sqlite db"
 readme = "README.md"
 requires-python = ">=3.9"
-keywords = ["tasks", "sqlite"]
+keywords = [ "task", "spooler", "database" ]
 classifiers = [
   	"Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
 ]
-
-[project.license]
-text = "CC-PDM-1.0"
+license = CC-PDM-1.0
+license-files = [ "LICEN[CS]E*" ]
 
 [project.urls]
 Homepage = "https://github.com/jncl/tsp"
