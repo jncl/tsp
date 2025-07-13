@@ -135,7 +135,7 @@ def do_run():
             time.sleep(1)
             continue
 
-        print(f'Running task {int(task['id'])}: {task['command']}')
+        print(f"Running task {int(task['id'])}: {task['command']}")
 
         if task['command'] == 'reload':
             db.set_finished(int(task['id']), CmdOutput.get_result(0, None, None),\
@@ -152,10 +152,10 @@ def do_run():
         try:
             db.set_finished(int(task['id']), run_command(task['command']),\
                             CalcTimes.get_elapsed(times))
-            print(f'Task {int(task['id'])} finished.')
+            print(f"Task {int(task['id'])} finished.")
         except (ValueError, sqlite3.Error) as e:
             db.set_failed(int(task['id']), str(e), CalcTimes.get_elapsed(times))
-            print(f'Task {int(task['id'])} failed: {e}.')
+            print(f"Task {int(task['id'])} failed: {e}.")
 
         db.commit()
 
@@ -167,26 +167,26 @@ def do_show(task_id):
 
     date_fmt = '%Y-%m-%d %H:%M:%S'
 
-    print(f'task id    : {task['id']}')
-    print(f'added at   : {time.strftime(date_fmt, time.localtime(task['added_at']))}')
+    print(f"task id    : {task['id']}")
+    print(f"added at   : {time.strftime(date_fmt, time.localtime(task['added_at']))}")
 
-    print(f'run at     : {time.strftime(date_fmt, time.localtime(task['run_at']))}'
+    print(f"run at     : {time.strftime(date_fmt, time.localtime(task['run_at']))}"
         if task['run_at'] else 'run at     : never')
 
-    print(f'finished at: {time.strftime(date_fmt, time.localtime(task['finished_at']))}'
+    print(f"finished at: {time.strftime(date_fmt, time.localtime(task['finished_at']))}"
         if task['finished_at'] else 'finished at: never')
 
-    print(f'command    : {task['command']}')
+    print(f"command    : {task['command']}")
 
-    print(f'result     : {task['result']}'
+    print(f"result     : {task['result']}"
         if task['result'] is not None else 'result     : none')
 
     if task['time_r']:
-        print(f'real time  : {task['time_r']}')
+        print(f"real time  : {task['time_r']}")
     if task['time_u']:
-        print(f'user time  : {task['time_u']}')
+        print(f"user time  : {task['time_u']}")
     if task['time_s']:
-        print(f'sys time   : {task['time_s']}')
+        print(f"sys time   : {task['time_s']}")
 
     if not task['stdout']:
         print('stdout     : empty')
@@ -266,7 +266,7 @@ def print_task_list(tasks, header, no_header):
             else:
                 dur = 0
 
-            print(f'{t['id']}  {ts}  {dur}  {mark}   {t['command']}')
+            print(f"{t['id']}  {ts}  {dur}  {mark}   {t['command']}")
 
 
 def run_command(command):

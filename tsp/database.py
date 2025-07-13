@@ -76,10 +76,7 @@ class DAL:
             marks.append('?')
             params.append(v)
 
-        # csep = lambda items: ', '.join(items)
-
-        query = f'INSERT INTO {table} ({', '.join(fields)}) VALUES ({', '.join(marks)})'
-        # query = 'INSERT INTO `%s` (%s) VALUES (%s)' % (table, csep(fields), csep(marks))
+        query = f"INSERT INTO {table} {(', '.join(fields))} VALUES {(', '.join(marks))}"
         return self.query(query, params)
 
     def query(self, query, params=None):
@@ -102,7 +99,6 @@ class DAL:
 
         except:
             print(f'failed SQL statement: {query}, params: {params}')
-            # self.log_exception(f'failed SQL statement: {query}, params: {params}')
             raise
 
         finally:
@@ -127,10 +123,9 @@ class DAL:
                 where.append(k + ' = ?')
                 params.append(v)
 
-        query = f'UPDATE {table} SET {', '.join(parts)}'
+        query = f"UPDATE {table} SET {', '.join(parts)}"
         if where:
-            query += f' WHERE {' AND '.join(where)}'
-            # query += ' WHERE %s' % ' AND '.join(where)
+            query += f" WHERE {' AND '.join(where)}"
 
         return self.query(query, params)
 
