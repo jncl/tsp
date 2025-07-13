@@ -15,6 +15,7 @@ except ImportError:
     print('Please install pysqlite2.', file=sys.stderr)
     sys.exit(13)
 
+from tsp.email import Email
 
 BOOTSTRAP = [
     'CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY, added_at INTEGER, run_at INTEGER, finished_at INTEGER, command TEXT, status INTEGER, result INTEGER, stdout TEXT, stderr TEXT, time_r REAL, time_u REAL, time_s REAL)',
@@ -177,14 +178,17 @@ class Database(DAL):
         return self.add_task(command)
 
     def reset_running(self):
-        # TODO: email about unfinished tasks.
         self.query('UPDATE tasks SET status = 0 WHERE status = 1')
+        emsg = Email()
+        emsg.sendmail("Running Tasks reset",\
+                 "All running tasks were reset, please check them and re-run as necessary")
 
     def set_failed(self, task_id, msg, rtime=None, utime=None, stime=None):
         if not isinstance(task_id, int):
             raise ValueError('task_id must be an integer')
 
-        # TODO: email.
+        emsg = Email()
+        emsg.sendmail("Task Failed", f"Task id: {task_id}\n\nMessage:\n{memoryview(msg)}")
 
         return self.update('tasks', {
             'status': 2,
