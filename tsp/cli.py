@@ -1,6 +1,5 @@
 # vim: set ts=4 sts=4 sw=4 et tw=0 fileencoding=utf-8:
-
-from __future__ import print_function
+""" CLI implementation """
 
 import errno
 import fcntl
@@ -9,8 +8,9 @@ import subprocess
 import sys
 import time
 
+from dataclasses import dataclass
+import sqlite3
 from tsp.database import Database
-
 
 USAGE = """Task spooler.  Serializes background process execution.
 
@@ -18,6 +18,7 @@ Usage:
 
 tsp command            -- add task to the queue.
 tsp --replace command  -- add to the queue, removing existing unfinished entries.
+tsp --show             -- list all tasks
 tsp --pending          -- list pending tasks.
 tsp --finished         -- list finished tasks.
 tsp --failed           -- list failed tasks.
@@ -25,33 +26,52 @@ tsp --purge            -- delete pending tasks.
 tsp --run              -- run the daemon.
 """
 
+@dataclass
+class CalcTimes:
+    """ Calculated Times """
+    @staticmethod
+    def getnone():
+        """ used for no-op """
+        return None, None, None
 
-def calc_times(then):
-    now = os.times()
+    @staticmethod
+    def getelapsed(then):
+        """ get elapsed times """
+        now = os.times()
+        utime = now[0] - then[0]
+        stime = now[1] - then[1]
+        rtime = now[4] - then[4]
+        return utime, stime, rtime
 
-    utime = now[0] - then[0]
-    stime = now[1] - then[1]
-    rtime = now[4] - then[4]
+@dataclass
+class CmdOutput:
+    """ Command return values """
+    @staticmethod
+    def getresult(returncode, output, error):
+        """ return params """
+        return returncode, output, error
 
-    return rtime, utime, stime
 
-def do_add(replace, command):
+def do_add(_replace, command):
+    """ Add command to database """
     if command is None:
         print('Command not specified.', file=sys.stderr)
-        exit(1)
+        sys.exit(1)
 
     with Database() as db:
         task_id = db.add_task(command)
 
-    print('Task %d added.' % task_id)
+    print(f'Task {task_id} added.')
 
 
 def do_help():
+    """ Show usage """
     print(USAGE, file=sys.stderr)
-    exit(1)
+    sys.exit(1)
 
 
 def do_list_failed():
+    """ list failed commands """
     with Database() as db:
         tasks = db.list_failed_tasks()
 
@@ -59,6 +79,7 @@ def do_list_failed():
 
 
 def do_list_finished():
+    """ list finished commands """
     with Database() as db:
         tasks = db.list_finished_tasks()
 
@@ -66,6 +87,7 @@ def do_list_finished():
 
 
 def do_list_last():
+    """ list last command """
     with Database() as db:
         tasks = db.list_last_tasks()
 
@@ -73,6 +95,7 @@ def do_list_last():
 
 
 def do_list_pending():
+    """ list pending command(s) """
     with Database() as db:
         tasks = db.list_pending_tasks()
 
@@ -80,20 +103,22 @@ def do_list_pending():
 
 
 def do_purge():
+    """ purge remaing commands """
     with Database() as db:
         count = db.purge_pending()
-        print('Deleted %d unfinished tasks.' % count)
+        print(f'Deleted {count} unfinished tasks.')
 
 
 def do_run():
+    """ run scheduler precoess """
     try:
         lock = os.path.expanduser('~/.cache/tsp.lock')
-        flock = open(lock, 'w')
-        fcntl.lockf(flock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        with open(lock, 'w', encoding="utf-8") as flock:
+            fcntl.lockf(flock, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except IOError as e:
         if e.errno == errno.EAGAIN:
             print('tsp daemon is already running', file=sys.stderr)
-            exit(1)
+            sys.exit(1)
         else:
             raise
 
@@ -110,13 +135,14 @@ def do_run():
             time.sleep(1)
             continue
 
-        print('Running task %d: %s' % (int(task['id']), task['command']))
+        print(f'Running task {int(task['id'])}: {task['command']}')
 
         if task['command'] == 'reload':
-            db.set_finished(int(task['id']), 0, None, None)
+            db.set_finished(int(task['id']), CmdOutput.getresult(0, None, None),\
+                            CalcTimes.getnone())
             db.commit()
             print('Reloading.')
-            exit(0)
+            sys.exit(0)
 
         times = os.times()
 
@@ -124,50 +150,43 @@ def do_run():
         db.commit()
 
         try:
-            rc, out, err = run_command(task['command'])
-            rtime, utime, stime = calc_times(times)
-            db.set_finished(int(task['id']), rc, out, err, rtime, utime, stime)
-            print('Task %d finished.' % int(task['id']))
-        except Exception as e:
-            rtime, utime, stime = calc_times(times)
-            db.set_failed(int(task['id']), str(e), rtime, utime, stime)
-            print('Task %d failed: %s.' % (int(task['id']), e))
+            db.set_finished(int(task['id']), run_command(task['command']),\
+                            CalcTimes.getelapsed(times))
+            print(f'Task {int(task['id'])} finished.')
+        except (ValueError, sqlite3.Error) as e:
+            db.set_failed(int(task['id']), str(e), CalcTimes.getelapsed(times))
+            print(f'Task {int(task['id'])} failed: {e}.')
 
         db.commit()
 
 
 def do_show(task_id):
+    """ show commands """
     with Database() as db:
         task = db.get_task(int(task_id))
 
     date_fmt = '%Y-%m-%d %H:%M:%S'
 
-    print('task id    : %d' % task['id'])
-    print('added at   : %s' % time.strftime(date_fmt, time.localtime(task['added_at'])))
+    print(f'task id    : {task['id']}')
+    print(f'added at   : {time.strftime(date_fmt, time.localtime(task['added_at']))}')
 
-    if task['run_at']:
-        print('run at     : %s' % time.strftime(date_fmt, time.localtime(task['run_at'])))
-    else:
-        print('run at     : never')
+    print(f'run at     : {time.strftime(date_fmt, time.localtime(task['run_at']))}'
+        if task['run_at'] else 'run at     : never')
 
-    if task['finished_at']:
-        print('finished at: %s' % time.strftime(date_fmt, time.localtime(task['finished_at'])))
-    else:
-        print('finished at: never')
+    print(f'finished at: {time.strftime(date_fmt, time.localtime(task['finished_at']))}'
+        if task['finished_at'] else 'finished at: never')
 
-    print('command    : %s' % task['command'])
+    print(f'command    : {task['command']}')
 
-    if task['result'] is not None:
-        print('result     : %d' % task['result'])
-    else:
-        print('result     : none')
+    print(f'result     : {task['result']}'
+        if task['result'] is not None else 'result     : none')
 
     if task['time_r']:
-        print('real time  : %.2f' % task['time_r'])
+        print(f'real time  : {task['time_r']}')
     if task['time_u']:
-        print('user time  : %.2f' % task['time_u'])
+        print(f'user time  : {task['time_u']}')
     if task['time_s']:
-        print('sys time   : %.2f' % task['time_s'])
+        print(f'sys time   : {task['time_s']}')
 
     if not task['stdout']:
         print('stdout     : empty')
@@ -176,15 +195,14 @@ def do_show(task_id):
         print('stderr     : empty')
 
     if task['stdout']:
-        stdout = str(task['stdout'])
-        print("\n--- stdout ---\n\n%s\n" % stdout.rstrip())
+        print(f"\n--- stdout ---\n\n{str(task['stdout']).rstrip()}\n")
 
     if task['stderr']:
-        stderr = str(task['stderr'])
-        print("\n--- stderr ---\n\n%s\n" % stderr.rstrip())
+        print(f"\n--- stderr ---\n\n{str(task['stderr']).rstrip()}\n")
 
 
 def find_executable(command):
+    """ find command executeable """
     if os.path.exists(command):
         return command
 
@@ -195,54 +213,40 @@ def find_executable(command):
         if os.path.exists(exe):
             return exe
 
-    raise RuntimeError('command %s not found' % base)
+    raise RuntimeError(f'command {base} not found')
 
 
 def main():
-    action = None
+    """ process command line arguments """
     replace = False
-    command = None
 
+    if len(sys.argv) - 1 == 0:
+        return do_list_last()
     for idx, arg in enumerate(sys.argv[1:]):
-        if arg == '--failed':
-            return do_list_failed()
-        elif arg == '--finished':
-            return do_list_finished()
-        elif arg == '--pending':
-            return do_list_pending()
-        elif arg == '--pending':
-            return do_list_pending()
-        elif arg == '--purge':
-            return do_purge()
-        elif arg == '--replace':
+        if arg == '--replace':
             replace = True
             continue
-        elif arg == '--run':
-            return do_run()
-        elif arg == '--show':
-            action = 'show'
-        elif arg.startswith('--'):
-            return do_help()
-        else:
-            command = sys.argv[idx+1:]
-            if action is None:
-                action = 'add'
-            break
+        if not arg.startswith('--'):
+            return do_add(replace, arg)
+        return {
+            '--show': do_show(sys.argv[idx+1:]),
+            '--pending': do_list_pending(),
+            '--finished': do_list_finished(),
+            '--failed': do_list_failed(),
+            '--purge': do_purge(),
+            '--run': do_run(),
+            '--*': do_help(),
+        }.get(arg)
 
-    if action == 'add':
-        do_add(replace, command)
-    elif action == 'show':
-        do_show(command[0])
-    else:
-        do_list_last()
 
 
 def print_task_list(tasks, header, no_header):
+    """ print task list """
     if not tasks:
         print(no_header)
 
     else:
-        print('--- %s ---' % header)
+        print(f'--- {header} ---')
         print('   id  date   time   dur  res command')
         print('----- ------ ------ ---- ---- -----------------')
         for t in tasks:
@@ -253,7 +257,7 @@ def print_task_list(tasks, header, no_header):
             elif t['status'] == 1:
                 mark = '*'
             elif t['result'] == 0:
-                mark = u'✓'
+                mark = '✓'
             else:
                 mark = 'x'
 
@@ -262,12 +266,12 @@ def print_task_list(tasks, header, no_header):
             else:
                 dur = 0
 
-            print('%5d  %s  %3u  %s   %s' % (t['id'], ts, dur, mark, t['command']))
+            print(f'{t['id']}  {ts}  {dur}  {mark}   {t['command']}')
 
 
 def run_command(command):
+    """ run command """
     command = command.split()
     command[0] = find_executable(command[0])
-    p = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    out, err = p.communicate()
-    return p.returncode, out, err
+    with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as p:
+        return CmdOutput.getresult(p.returncode, *(p.communicate()))

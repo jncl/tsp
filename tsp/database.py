@@ -1,6 +1,5 @@
 # vim: set ts=4 sts=4 sw=4 et tw=0:
-
-from __future__ import print_function
+""" Database functions"""
 
 import os
 import sys
@@ -8,24 +7,22 @@ import time
 
 __all__ = ['Database']
 
-try:
-    from sqlite3 import dbapi2 as sqlite
-    from sqlite3 import OperationalError
-except ImportError:
-    print('Please install pysqlite2.', file=sys.stderr)
-    sys.exit(13)
+from sqlite3 import dbapi2 as sqlite
 
 from tsp.email import Email
 
 BOOTSTRAP = [
-    'CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY, added_at INTEGER, run_at INTEGER, finished_at INTEGER, command TEXT, status INTEGER, result INTEGER, stdout TEXT, stderr TEXT, time_r REAL, time_u REAL, time_s REAL)',
+    'CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY, added_at INTEGER, run_at INTEGER,\
+        finished_at INTEGER, command TEXT, status INTEGER, result INTEGER, stdout TEXT,\
+        stderr TEXT, time_r REAL, time_u REAL, time_s REAL)',
     'CREATE INDEX IF NOT EXISTS IDX_tasks_command ON tasks (command)',
 ]
 
 DB_PATH = os.path.expanduser('~/.local/share/tsp/tasks.db')
 
 
-class DAL(object):
+class DAL:
+    """ Abstraction layer """
     def __del__(self):
         self.rollback()
 
@@ -33,7 +30,7 @@ class DAL(object):
         self.begin_transaction()
         return self
 
-    def __exit__(self, type, value, tb):
+    def __exit__(self, _type, _value, tb):
         if tb is None:
             self.commit()
         else:
@@ -45,16 +42,20 @@ class DAL(object):
         self.bootstrap()
 
     def begin_transaction(self):
+        """ begin a transaction """
         self.query('BEGIN TRANSACTION')
 
     def bootstrap(self):
+        """ bootstrap database """
         for query in BOOTSTRAP:
             self.query(query)
 
     def commit(self):
+        """ commit update(s) """
         self.db.commit()
 
     def connect(self):
+        """ connect to database """
         folder = os.path.dirname(self.filename)
         if not os.path.exists(folder):
             os.makedirs(folder)
@@ -65,6 +66,7 @@ class DAL(object):
         return db
 
     def insert(self, table, props):
+        """ insert task into database """
         fields = []
         marks = []
         params = []
@@ -74,12 +76,14 @@ class DAL(object):
             marks.append('?')
             params.append(v)
 
-        csep = lambda items: ', '.join(items)
+        # csep = lambda items: ', '.join(items)
 
-        query = 'INSERT INTO `%s` (%s) VALUES (%s)' % (table, csep(fields), csep(marks))
+        query = f'INSERT INTO {table} ({', '.join(fields)}) VALUES ({', '.join(marks)})'
+        # query = 'INSERT INTO `%s` (%s) VALUES (%s)' % (table, csep(fields), csep(marks))
         return self.query(query, params)
 
     def query(self, query, params=None):
+        """ quesy database """
         cur = self.db.cursor()
 
         args = [query]
@@ -92,22 +96,24 @@ class DAL(object):
                 rows = cur.fetchall()
                 names = [desc[0] for desc in cur.description]
                 return [dict(zip(names, row)) for row in rows]
-            elif query.startswith('INSERT '):
+            if query.startswith('INSERT '):
                 return cur.lastrowid
-            else:
-                return cur.rowcount
+            return cur.rowcount
 
         except:
-            self.log_exception('failed SQL statement: %s, params: %s' % (query, params))
+            print(f'failed SQL statement: {query}, params: {params}')
+            # self.log_exception(f'failed SQL statement: {query}, params: {params}')
             raise
 
         finally:
             cur.close()
 
     def rollback(self):
+        """ rollback changes """
         self.db.rollback()
 
     def update(self, table, props, conditions):
+        """ update task """
         parts = []
         params = []
         where = []
@@ -121,15 +127,19 @@ class DAL(object):
                 where.append(k + ' = ?')
                 params.append(v)
 
-        query = 'UPDATE `%s` SET %s' % (table, ', '.join(parts))
+        query = f'UPDATE {table} SET {', '.join(parts)}'
         if where:
-            query += ' WHERE %s' % ' AND '.join(where)
+            query += f' WHERE {' AND '.join(where)}'
+            # query += ' WHERE %s' % ' AND '.join(where)
 
         return self.query(query, params)
 
 
 class Database(DAL):
+    """ Database class """
+
     def add_task(self, command):
+        """ add task """
         if not isinstance(command, (list, tuple)):
             raise ValueError('task command must be list of arguments')
 
@@ -142,26 +152,37 @@ class Database(DAL):
         })
 
     def get_next_task(self):
+        """ get next task """
         rows = self.query('SELECT id, command FROM tasks WHERE status = 0 ORDER BY id LIMIT 1')
         return rows[0] if rows else None
 
     def get_task(self, task_id):
+        """ get task details """
         rows = self.query('SELECT * FROM tasks WHERE id = ?', [task_id])
         return rows[0] if rows else None
 
     def list_failed_tasks(self):
-        return self.query('SELECT id, run_at, added_at, finished_at, command, status, result FROM tasks WHERE status = 2 AND result <> 0 ORDER BY id')
+        """ list failed tasks """
+        return self.query('SELECT id, run_at, added_at, finished_at, command, status,\
+            result FROM tasks WHERE status = 2 AND result <> 0 ORDER BY id')
 
     def list_finished_tasks(self):
-        return self.query('SELECT id, run_at, added_at, finished_at, command, status, result FROM tasks WHERE status = 2 AND result = 0 ORDER BY id')
+        """ list finished tasks """
+        return self.query('SELECT id, run_at, added_at, finished_at, command, status,\
+            result FROM tasks WHERE status = 2 AND result = 0 ORDER BY id')
 
     def list_last_tasks(self):
-        return reversed(self.query('SELECT id, run_at, added_at, finished_at, command, status, result FROM tasks ORDER BY id DESC LIMIT 50'))
+        """ list last tasks """
+        return reversed(self.query('SELECT id, run_at, added_at, finished_at, command, status,\
+            result FROM tasks ORDER BY id DESC LIMIT 50'))
 
     def list_pending_tasks(self):
-        return self.query('SELECT id, run_at, added_at, finished_at, command, status, result FROM tasks WHERE status = 0 ORDER BY id')
+        """ list pending tasks """
+        return self.query('SELECT id, run_at, added_at, finished_at, command, status,\
+            result FROM tasks WHERE status = 0 ORDER BY id')
 
     def log_exception(self, msg):
+        """ log exception """
         print(msg, file=sys.stderr)
 
     def purge(self):
@@ -171,19 +192,23 @@ class Database(DAL):
         return count
 
     def purge_pending(self):
+        """ purge pending tasks """
         return self.query('DELETE FROM tasks WHERE status = 0')
 
     def replace_task(self, command):
+        """ replace task """
         self.query('DELETE FROM tasks WHERE status = 0 AND command = ?', [command])
         return self.add_task(command)
 
     def reset_running(self):
+        """ reset running tasks """
         self.query('UPDATE tasks SET status = 0 WHERE status = 1')
         emsg = Email()
         emsg.sendmail("Running Tasks reset",\
                  "All running tasks were reset, please check them and re-run as necessary")
 
-    def set_failed(self, task_id, msg, rtime=None, utime=None, stime=None):
+    def set_failed(self, task_id, msg, ctime):
+        """ set status to failed """
         if not isinstance(task_id, int):
             raise ValueError('task_id must be an integer')
 
@@ -192,34 +217,36 @@ class Database(DAL):
 
         return self.update('tasks', {
             'status': 2,
-            'stderr': buffer(msg),
+            'stderr': memoryview(msg),
             'result': -1,
             'finished_at': int(time.time()),
-            'time_r': rtime,
-            'time_u': utime,
-            'time_s': stime,
+            'time_r': ctime.rtime,
+            'time_u': ctime.utime,
+            'time_s': ctime.stime,
         }, {
             'id': task_id,
         })
 
-    def set_finished(self, task_id, rc, stdout, stderr, rtime=None, utime=None, stime=None):
+    def set_finished(self, task_id, coutput, ctime):
+        """ set status to finished """
         if not isinstance(task_id, int):
             raise ValueError('task_id must be an integer')
 
         return self.update('tasks', {
             'status': 2,
-            'stdout': buffer(stdout) if stdout else None,
-            'stderr': buffer(stderr) if stderr else None,
-            'result': rc,
+            'stdout': memoryview(coutput.stdout) if coutput.stdout else None,
+            'stderr': memoryview(coutput.stderr) if coutput.stderr else None,
+            'result': coutput.rc,
             'finished_at': int(time.time()),
-            'time_r': rtime,
-            'time_u': utime,
-            'time_s': stime,
+            'time_r': ctime.rtimes,
+            'time_u': ctime.utimes,
+            'time_s': ctime.stimes,
         }, {
             'id': task_id,
         })
 
     def set_running(self, task_id):
+        """ set status to running """
         if not isinstance(task_id, int):
             raise ValueError('task_id must be an integer')
 
@@ -231,6 +258,5 @@ class Database(DAL):
         })
 
     def shell_escape(self, args):
-        escape = lambda s: s if ' ' not in s else '"%s"' % s
-        args = [escape(arg) for arg in args]
-        return ' '.join(args)
+        """ shell escape """
+        return ' '.join(f'"{arg}"' for arg in args)
