@@ -18,7 +18,9 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
 ]
-license = "CC-PDM-1.0"
+
+[project.license]
+text = "CC-PDM-1.0"
 
 [project.urls]
 Homepage = "https://github.com/jncl/tsp"
