@@ -268,14 +268,19 @@ def main():
                       dest="task_id",
                       help="list all tasks")
     parser.add_option("-p", "--pending",
+                      action='store_true',
                       help="list pending tasks")
     parser.add_option("-e", "--finished",
+                      action='store_true',
                       help="list finished tasks")
     parser.add_option("-f", "--failed",
+                      action='store_true',
                       help="list failed tasks")
     parser.add_option("-d", "--purge",
+                      action='store_true',
                       help="delete pending tasks")
     parser.add_option("--run",
+                      action='store_true',
                       help="run the daemon")
 
     (opts, args) = parser.parse_args()
