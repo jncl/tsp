@@ -39,10 +39,17 @@ class CalcTimes:
 @dataclass
 class CmdOutput:
     """ Command return values """
+    self.rc = 0
+    self.stdout = None
+    self.stderr = None
+
     @staticmethod
     def get_result(returncode, output, error):
-        """ return params """
-        return returncode, output, error
+        """ return passed params """
+        self.rc = returncode
+        self.stdout = output
+        self.stderr = error
+        return self
 
 def do_add(replace, command):
     """ Add command to database """
