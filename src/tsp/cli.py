@@ -14,19 +14,19 @@ from dataclasses import dataclass
 import sqlite3
 from tsp.database import Database
 
-USAGE = """Task spooler.  Serializes background process execution.
+# USAGE = """Task spooler.  Serializes background process execution.
 
-Usage:
+# Usage:
 
-tsp command            -- add task to the queue.
-tsp --replace command  -- add to the queue, removing existing unfinished entries.
-tsp --show             -- list all tasks
-tsp --pending          -- list pending tasks.
-tsp --finished         -- list finished tasks.
-tsp --failed           -- list failed tasks.
-tsp --purge            -- delete pending tasks.
-tsp --run              -- run the daemon.
-"""
+# tsp command            -- add task to the queue.
+# tsp --replace command  -- add to the queue, removing existing unfinished entries.
+# tsp --show             -- list all tasks
+# tsp --pending          -- list pending tasks.
+# tsp --finished         -- list finished tasks.
+# tsp --failed           -- list failed tasks.
+# tsp --purge            -- delete pending tasks.
+# tsp --run              -- run the daemon.
+# """
 
 @dataclass
 class CalcTimes:
@@ -66,10 +66,10 @@ def do_add(_replace, command):
     print(f'Task {task_id} added.')
 
 
-def do_help():
-    """ Show usage """
-    print(USAGE, file=sys.stderr)
-    sys.exit(1)
+# def do_help():
+#     """ Show usage """
+#     print(USAGE, file=sys.stderr)
+#     sys.exit(1)
 
 
 def do_list_failed():
@@ -270,7 +270,7 @@ def main():
                       help="list failed tasks")
     parser.add_option("-d", "--purge",
                       help="delete pending tasks")
-    parser.add_option("-r", "--run",
+    parser.add_option("--run",
                       help="run the daemon")
 
     (options, args) = parser.parse_args()
