@@ -110,7 +110,7 @@ def do_purge():
 
 
 def do_run():
-    """ run scheduler precoess """
+    """ run scheduler process """
     try:
         lock = os.path.expanduser('~/.cache/tsp.lock')
         with open(lock, 'w', encoding="utf-8") as flock:
