@@ -78,33 +78,33 @@ def do_add(replace, command):
 def do_list_failed():
     """ list failed commands """
     with Database() as db:
-        tasks = db.list_failed_tasks()
+        tasks, count = db.list_failed_tasks()
 
-    print_task_list(tasks, 'Failed tasks:', 'No failed tasks.')
+    print_task_list(tasks, count, 'Failed tasks:', 'No failed tasks.')
 
 
 def do_list_finished():
     """ list finished commands """
     with Database() as db:
-        tasks = db.list_finished_tasks()
+        tasks, count = db.list_finished_tasks()
 
-    print_task_list(tasks, 'Finished tasks:', 'No finished tasks.')
+    print_task_list(tasks, count, 'Finished tasks:', 'No finished tasks.')
 
 
 def do_list_last():
     """ list last command """
     with Database() as db:
-        tasks = db.list_last_tasks()
+        tasks, count = db.list_last_tasks()
 
-    print_task_list(tasks, 'Recent tasks:', 'No recent tasks.')
+    print_task_list(tasks, count, 'Recent tasks:', 'No recent tasks.')
 
 
 def do_list_pending():
     """ list pending command(s) """
     with Database() as db:
-        tasks = db.list_pending_tasks()
+        tasks, count = db.list_pending_tasks()
 
-    print_task_list(tasks, 'Pending tasks:', 'No pending tasks.')
+    print_task_list(tasks, count, 'Pending tasks:', 'No pending tasks.')
 
 
 def do_purge():
@@ -312,10 +312,10 @@ def main():
     return do_list_last()
 
 
-def print_task_list(tasks, header, no_header):
+def print_task_list(tasks, count, header, no_header):
     """ print tasks list """
 
-    # print(f"print_task_list - Tasks: [{tasks}]\n\n[{header}]\n\n[{no_header}]")
+    print(f"print_task_list - Tasks: [{tasks}]\n{count}\n[{header}]\n[{no_header}]")
 
     if not tasks:
         print(no_header)

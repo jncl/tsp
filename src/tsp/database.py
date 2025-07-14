@@ -80,7 +80,7 @@ class DAL:
         return self.query(query, params)
 
     def query(self, query, params=None):
-        """ quesy database """
+        """ query database """
         cur = self.db.cursor()
 
         args = [query]
@@ -92,7 +92,7 @@ class DAL:
             if query.startswith('SELECT '):
                 rows = cur.fetchall()
                 names = [desc[0] for desc in cur.description]
-                return [dict(zip(names, row)) for row in rows]
+                return [dict(zip(names, row)) for row in rows], cur.rowcount
             if query.startswith('INSERT '):
                 return cur.lastrowid
             return cur.rowcount
