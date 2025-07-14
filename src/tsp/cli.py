@@ -248,9 +248,10 @@ def main():
 def print_task_list(tasks, header, no_header):
     """ print tasks list """
 
-    print(f"print_task_list - Tasks: [{tasks}]\n\n[{header}]\n\n[{no_header}]")
+    # print(f"print_task_list - Tasks: [{tasks}]\n\n[{header}]\n\n[{no_header}]")
 
-    if not tasks:
+    if len(tasks) == 0:
+    # if not tasks:
         print(no_header)
 
     else:
