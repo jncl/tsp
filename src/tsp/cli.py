@@ -1,5 +1,8 @@
+# pylint: disable=logging-fstring-interpolation, too-many-return-statements
 # vim: set ts=4 sts=4 sw=4 et tw=0 fileencoding=utf-8:
 """ CLI implementation """
+
+import logging
 
 from optparse import OptionParser
 
@@ -14,19 +17,7 @@ from dataclasses import dataclass
 import sqlite3
 from tsp.database import Database
 
-# USAGE = """Task spooler.  Serializes background process execution.
-
-# Usage:
-
-# tsp command            -- add task to the queue.
-# tsp --replace command  -- add to the queue, removing existing unfinished entries.
-# tsp --show             -- list all tasks
-# tsp --pending          -- list pending tasks.
-# tsp --finished         -- list finished tasks.
-# tsp --failed           -- list failed tasks.
-# tsp --purge            -- delete pending tasks.
-# tsp --run              -- run the daemon.
-# """
+logger = logging.getLogger(__name__)
 
 @dataclass
 class CalcTimes:
@@ -53,11 +44,10 @@ class CmdOutput:
         """ return params """
         return returncode, output, error
 
-
 def do_add(replace, command):
     """ Add command to database """
     if command is None:
-        print('Command not specified.', file=sys.stderr)
+        logger.error('Command not specified.', file=sys.stderr)
         sys.exit(1)
 
     with Database() as db:
@@ -66,13 +56,7 @@ def do_add(replace, command):
         else:
             task_id = db.add_task(command)
 
-    print(f'Task {task_id} added.')
-
-
-# def do_help():
-#     """ Show usage """
-#     print(USAGE, file=sys.stderr)
-#     sys.exit(1)
+    logger.info(f'Task {task_id} added.')
 
 
 def do_list_failed():
@@ -111,7 +95,7 @@ def do_purge():
     """ purge remaing commands """
     with Database() as db:
         count = db.purge_pending()
-        print(f'Deleted {count} unfinished tasks.')
+        logger.info(f'Deleted {count} unfinished tasks.')
 
 
 def do_run():
@@ -122,7 +106,7 @@ def do_run():
             fcntl.lockf(flock, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except IOError as e:
         if e.errno == errno.EAGAIN:
-            print('tsp daemon is already running', file=sys.stderr)
+            logger.error('tsp daemon is already running', file=sys.stderr)
             sys.exit(1)
         else:
             raise
@@ -140,13 +124,13 @@ def do_run():
             time.sleep(1)
             continue
 
-        print(f"Running task {int(task['id'])}: {task['command']}")
+        logger.info(f"Running task {int(task['id'])}: {task['command']}")
 
         if task['command'] == 'reload':
             db.set_finished(int(task['id']), CmdOutput.get_result(0, None, None),\
                             CalcTimes.get_none())
             db.commit()
-            print('Reloading.')
+            logger.info('Reloading.')
             sys.exit(0)
 
         times = os.times()
@@ -157,10 +141,10 @@ def do_run():
         try:
             db.set_finished(int(task['id']), run_command(task['command']),\
                             CalcTimes.get_elapsed(times))
-            print(f"Task {int(task['id'])} finished.")
+            logger.info(f"Task {int(task['id'])} finished.")
         except (ValueError, sqlite3.Error) as e:
             db.set_failed(int(task['id']), str(e), CalcTimes.get_elapsed(times))
-            print(f"Task {int(task['id'])} failed: {e}.")
+            logger.error(f"Task {int(task['id'])} failed: {e}.")
 
         db.commit()
 
@@ -218,36 +202,13 @@ def find_executable(command):
         if os.path.exists(exe):
             return exe
 
+    logger.error(f'command {base} not found')
     raise RuntimeError(f'command {base} not found')
 
-
 def main():
-    # """ process command line arguments """
-    # replace = False
+    """ process command line arguments """
 
-    # if len(sys.argv) - 1 == 0:
-    #     return do_list_last()
-    # for idx, arg in enumerate(sys.argv[1:]):
-    #     if arg == '--replace':
-    #         replace = True
-    #         continue
-    #     if not arg.startswith('--'):
-    #         return do_add(replace, [arg])
-    #     if arg == "--show":
-    #         if len(sys.argv) -1 == 2:
-    #             task_id = sys.argv[idx+1:]
-    #             return do_show(task_id)
-    #         print("Missing Task ID")
-    #         continue
-    #     # handle other options
-    #     return {
-    #         '--pending': do_list_pending(),
-    #         '--finished': do_list_finished(),
-    #         '--failed': do_list_failed(),
-    #         '--purge': do_purge(),
-    #         '--run': do_run(),
-    #         '--*': do_help(),
-    #     }.get(arg)
+    logging.basicConfig(filename='tsp.log', level=logging.INFO)
 
     parser = OptionParser()
     parser.set_defaults(verbose=True)
@@ -266,7 +227,7 @@ def main():
     parser.add_option("-s", "--show",
                       action="store", type="int",
                       dest="task_id",
-                      help="list all tasks")
+                      help="list task entry")
     parser.add_option("-p", "--pending",
                       action='store_true',
                       help="list pending tasks")
@@ -285,7 +246,9 @@ def main():
 
     (opts, args) = parser.parse_args()
     if opts.verbose:
-        print(f"Options: {opts}\nArgs: {args}")
+        logger.setLevel("DEBUG")
+
+    logger.debug(f"Options: {opts}\nArgs: {args}")
 
     if opts.pending:
         return do_list_pending()
@@ -302,11 +265,8 @@ def main():
     if opts.task:
         return do_add(opts.replace, opts.task)
 
-
     # add a task if supplied
     if len(args) > 0:
-        if opts.verbose:
-            print(f"Adding a task\nArgs: {args}")
         return do_add(None, args)
 
     return do_list_last()
@@ -315,9 +275,9 @@ def main():
 def print_task_list(tasks, count, header, no_header):
     """ print tasks list """
 
-    print(f"print_task_list - Tasks: [{tasks}]\n[{count}]\n[{header}]\n[{no_header}]")
+    logger.debug(f"print_task_list - Tasks: [{tasks}]\n[{count}]\n[{header}]\n[{no_header}]")
 
-    if not tasks:
+    if count == 0:
         print(no_header)
 
     else:

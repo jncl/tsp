@@ -1,5 +1,8 @@
+# pylint: disable=logging-fstring-interpolation
 # vim: set ts=4 sts=4 sw=4 et tw=0:
 """ Database functions"""
+
+import logging
 
 import os
 import sys
@@ -10,6 +13,9 @@ __all__ = ['Database']
 from sqlite3 import dbapi2 as sqlite
 
 from tsp.email import Email
+
+logger = logging.getLogger(__name__)
+
 
 BOOTSTRAP = [
     'CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY, added_at INTEGER, run_at INTEGER,\
@@ -98,7 +104,7 @@ class DAL:
             return cur.rowcount
 
         except:
-            print(f'failed SQL statement: {query}, params: {params}')
+            logger.error(f'failed SQL statement: {query}, params: {params}')
             raise
 
         finally:
@@ -136,6 +142,7 @@ class Database(DAL):
     def add_task(self, command):
         """ add task """
         if not isinstance(command, (list, tuple)):
+            logger.error('task command must be list of arguments')
             raise ValueError('task command must be list of arguments')
 
         command = self.shell_escape(command)
@@ -182,7 +189,7 @@ class Database(DAL):
 
     def log_exception(self, msg):
         """ log exception """
-        print(msg, file=sys.stderr)
+        logger.error(msg, file=sys.stderr)
 
     def purge(self):
         """Delete logs older than 1 week."""
@@ -209,6 +216,7 @@ class Database(DAL):
     def set_failed(self, task_id, msg, ctime):
         """ set status to failed """
         if not isinstance(task_id, int):
+            logger.error('task_id must be an integer')
             raise ValueError('task_id must be an integer')
 
         em = Email()
@@ -229,6 +237,7 @@ class Database(DAL):
     def set_finished(self, task_id, coutput, ctime):
         """ set status to finished """
         if not isinstance(task_id, int):
+            logger.error('task_id must be an integer')
             raise ValueError('task_id must be an integer')
 
         return self.update('tasks', {
@@ -247,6 +256,7 @@ class Database(DAL):
     def set_running(self, task_id):
         """ set status to running """
         if not isinstance(task_id, int):
+            logger.error('task_id must be an integer')
             raise ValueError('task_id must be an integer')
 
         return self.update('tasks', {

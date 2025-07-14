@@ -1,4 +1,8 @@
+# pylint: disable=logging-fstring-interpolation
+# vim: set ts=4 sts=4 sw=4 et tw=0:
 """ Email module """
+
+import logging
 
 import os
 
@@ -9,6 +13,8 @@ import smtplib
 from email.message import EmailMessage
 
 from dataclasses import dataclass
+
+logger = logging.getLogger(__name__)
 
 @dataclass
 class Email:
@@ -26,7 +32,7 @@ class Email:
 
         self.msg.set_content(body)
 
-        print(f"Email contents: {self.msg}")
+        logger.debug(f"Email contents: {self.msg}")
 
         # determine how to send an email
 
