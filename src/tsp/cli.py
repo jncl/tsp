@@ -228,8 +228,14 @@ def main():
             continue
         if not arg.startswith('--'):
             return do_add(replace, arg)
+        if arg == "--show":
+            if len(sys.argv) -1 == 2:
+                task_id = sys.argv[idx+1:]
+            else:
+                print("Missing Task ID")
+                continue
         return {
-            '--show': do_show(sys.argv[idx+1:]),
+            '--show': do_show(task_id),
             '--pending': do_list_pending(),
             '--finished': do_list_finished(),
             '--failed': do_list_failed(),
@@ -241,7 +247,10 @@ def main():
 
 
 def print_task_list(tasks, header, no_header):
-    """ print task list """
+    """ print tasks list """
+
+    print(f"print_task_list - Tasks: [{tasks}]\n\n[{header}]\n\n[{no_header}]")
+
     if not tasks:
         print(no_header)
 
