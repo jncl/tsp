@@ -146,12 +146,13 @@ class Database(DAL):
             raise ValueError('task command must be list of arguments')
 
         logger.debug(f"add_task#1: {command}")
-        command = self.shell_escape(command)
-        logger.debug(f"add_task#2: {command}")
+        # command = self.shell_escape(command)
+        cmd_str = " ".join(command)
+        logger.debug(f"add_task#2: {cmd_str}")
 
         return self.insert('tasks', {
             'added_at': int(time.time()),
-            'command': command,
+            'command': cmd_str,
             'status': 0,
         })
 
