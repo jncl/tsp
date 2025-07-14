@@ -297,8 +297,14 @@ def main():
     if opts.command:
         return do_add(opts.replace, opts.command)
 
-    if opts.verbose:
-        print(f"No option supplied\nArgs: {args}")
+
+    # add a task if supplied
+    if len(args) > 0:
+        if opts.verbose:
+            print(f"Adding a task\nArgs: {args}")
+        return do_add(None, args)
+    else:
+        return do_list_last()
 
 
 def print_task_list(tasks, header, no_header):
