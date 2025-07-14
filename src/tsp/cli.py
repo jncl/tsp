@@ -282,8 +282,6 @@ def main():
     if opts.verbose:
         print(f"Options: {opts}\nArgs: {args}")
 
-    if opts.show:
-        return do_show(opts.task_id)
     if opts.pending:
         return do_list_pending()
     if opts.finished:
@@ -294,7 +292,9 @@ def main():
         return do_purge()
     if opts.run:
         return do_run()
-    if opts.add or opts.replace:
+    if opts.task_id:
+        return do_show(opts.task_id)
+    if opts.command:
         return do_add(opts.replace, opts.command)
 
     if opts.verbose:
