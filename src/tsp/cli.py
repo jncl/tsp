@@ -270,7 +270,7 @@ def main():
 
     # add a task
     if len(args) > 0:
-        return do_add(opts.replace, args)
+        return do_add(opts.replace, " ".join(str(x) for x in args))
 
     return do_list_last()
 
