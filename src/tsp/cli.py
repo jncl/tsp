@@ -258,7 +258,7 @@ def main():
                       action="store_false", dest="verbose",
                       help="don't print status messages to stdout")
     parser.add_option("-a", "--add",
-                      dest="command",
+                      dest="task",
                       help="add a task to the queue")
     parser.add_option("-r", "--replace",
                       action="store_true", dest="replace",
@@ -295,7 +295,7 @@ def main():
     if opts.task_id:
         return do_show(opts.task_id)
     if opts.command:
-        return do_add(opts.replace, opts.command)
+        return do_add(opts.replace, opts.task)
 
 
     # add a task if supplied
@@ -303,8 +303,8 @@ def main():
         if opts.verbose:
             print(f"Adding a task\nArgs: {args}")
         return do_add(None, args)
-    else:
-        return do_list_last()
+
+    return do_list_last()
 
 
 def print_task_list(tasks, header, no_header):
