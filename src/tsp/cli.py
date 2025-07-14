@@ -227,7 +227,7 @@ def main():
             replace = True
             continue
         if not arg.startswith('--'):
-            return do_add(replace, arg.split())
+            return do_add(replace, [arg])
         if arg == "--show":
             if len(sys.argv) -1 == 2:
                 task_id = sys.argv[idx+1:]
