@@ -92,7 +92,7 @@ def do_list_pending():
 
 
 def do_purge():
-    """ purge remaing commands """
+    """ purge remaining commands """
     with Database() as db:
         count = db.purge_pending()
         logger.info(f'Deleted {count} unfinished tasks.')
@@ -114,6 +114,9 @@ def do_run():
     db = Database()
 
     db.reset_running()
+    db.commit()
+
+    db.purge_older()
     db.commit()
 
     while True:

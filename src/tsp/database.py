@@ -85,6 +85,10 @@ class DAL:
         query = f"INSERT INTO {table} ({', '.join(fields)}) VALUES ({', '.join(marks)})"
         return self.query(query, params)
 
+    def log_exception(self, msg):
+        """ log exception """
+        logger.error(msg)
+
     def query(self, query, params=None):
         """ query database """
         cur = self.db.cursor()
@@ -104,7 +108,7 @@ class DAL:
             return cur.rowcount
 
         except:
-            logger.error(f'failed SQL statement: {query}, params: {params}')
+            self.log_exception(f'failed SQL statement: {query}, params: {params}')
             raise
 
         finally:
@@ -190,18 +194,14 @@ class Database(DAL):
             result FROM tasks WHERE status = 0 ORDER BY id')
         return rows, len(rows)
 
-    def log_exception(self, msg):
-        """ log exception """
-        logger.error(msg, file=sys.stderr)
-
-    def purge(self):
-        """Delete logs older than 1 week."""
+    def purge_older(self):
+        """ Delete tasks older than 1 week. """
         since = time.time() - 86400 * 7
         count = self.query('DELETE FROM tasks WHERE status = 2 AND added_at < ?', [since])
         return count
 
     def purge_pending(self):
-        """ purge pending tasks """
+        """ Delete all pending tasks """
         return self.query('DELETE FROM tasks WHERE status = 0')
 
     def replace_task(self, command):
