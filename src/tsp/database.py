@@ -205,7 +205,16 @@ class Database(DAL):
 
     def replace_task(self, command):
         """ replace task """
-        self.query('DELETE FROM tasks WHERE command = ?', [command])
+        if not isinstance(command, (list, tuple)):
+            logger.error('task command must be list of arguments')
+            raise ValueError('task command must be list of arguments')
+
+        logger.debug(f"replace_task#1: {command}")
+        cmd_str = " ".join(command)
+        logger.debug(f"replace_task#2: {cmd_str}")
+
+        self.query('DELETE FROM tasks WHERE command = ?', cmd_str)
+        # self.query('DELETE FROM tasks WHERE command = ?', [command])
         return self.add_task(command)
 
     def reset_running(self):
