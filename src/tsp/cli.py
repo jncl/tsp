@@ -232,9 +232,8 @@ def main():
             if len(sys.argv) -1 == 2:
                 task_id = sys.argv[idx+1:]
                 return do_show(task_id)
-            else:
-                print("Missing Task ID")
-                continue
+            print("Missing Task ID")
+            continue
         # handle other options
         return {
             '--pending': do_list_pending(),
