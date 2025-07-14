@@ -92,7 +92,7 @@ class DAL:
             if query.startswith('SELECT '):
                 rows = cur.fetchall()
                 names = [desc[0] for desc in cur.description]
-                return [dict(zip(names, row)) for row in rows], len(rows)
+                return [dict(zip(names, row)) for row in rows]
             if query.startswith('INSERT '):
                 return cur.lastrowid
             return cur.rowcount
@@ -158,23 +158,27 @@ class Database(DAL):
 
     def list_failed_tasks(self):
         """ list failed tasks """
-        return self.query('SELECT id, run_at, added_at, finished_at, command, status,\
+        rows = self.query('SELECT id, run_at, added_at, finished_at, command, status,\
             result FROM tasks WHERE status = 2 AND result <> 0 ORDER BY id')
+        return rows, len(rows)
 
     def list_finished_tasks(self):
         """ list finished tasks """
-        return self.query('SELECT id, run_at, added_at, finished_at, command, status,\
+        rows = self.query('SELECT id, run_at, added_at, finished_at, command, status,\
             result FROM tasks WHERE status = 2 AND result = 0 ORDER BY id')
+        return rows, len(rows)
 
     def list_last_tasks(self):
         """ list last tasks """
-        return reversed(self.query('SELECT id, run_at, added_at, finished_at, command, status,\
-            result FROM tasks ORDER BY id DESC LIMIT 50'))
+        rows = self.query('SELECT id, run_at, added_at, finished_at, command, status,\
+            result FROM tasks ORDER BY id DESC LIMIT 50')
+        return reversed(rows), len(rows)
 
     def list_pending_tasks(self):
         """ list pending tasks """
-        return self.query('SELECT id, run_at, added_at, finished_at, command, status,\
+        rows = self.query('SELECT id, run_at, added_at, finished_at, command, status,\
             result FROM tasks WHERE status = 0 ORDER BY id')
+        return rows, len(rows)
 
     def log_exception(self, msg):
         """ log exception """
