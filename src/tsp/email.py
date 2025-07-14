@@ -26,6 +26,10 @@ class Email:
 
         self.msg.set_content(body)
 
-    	# Send the email via our own SMTP server.
-        with smtplib.SMTP('localhost') as s:
-            s.send_message(self.msg)
+        print(f"Email contents: {msg}")
+
+        # determine how to send an email
+
+    	# # Send the email via our own SMTP server.
+        # with smtplib.SMTP('localhost') as s:
+        #     s.send_message(self.msg)
