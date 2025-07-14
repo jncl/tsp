@@ -261,6 +261,7 @@ def main():
                       dest="command",
                       help="add a task to the queue, removing any existing matching tasks")
     parser.add_option("-s", "--show",
+                      dest="task_id",
                       help="list all tasks")
     parser.add_option("-p", "--pending",
                       help="list pending tasks")
@@ -276,6 +277,24 @@ def main():
     (options, args) = parser.parse_args()
     if options.verbose:
         print(f"Options: {options}\nArgs: {args}")
+
+    if options.show:
+        return do_show(options.task_id)
+    if options.pending:
+        return do_list_pending()
+    if options.finished:
+        return do_list_finished()
+    if options.failed:
+        return do_list_failed()
+    if options.purge:
+        return do_purge()
+    if options.run:
+        return do_run()
+    if options.replace:
+        return do_add(True, options.command)
+    if options.add:
+        return do_add(options.command)
+
 
 
 def print_task_list(tasks, header, no_header):
