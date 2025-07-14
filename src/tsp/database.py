@@ -268,4 +268,6 @@ class Database(DAL):
 
     def shell_escape(self, args):
         """ shell escape """
-        return ' '.join(f'"{arg}"' for arg in args)
+        if len(args) > 1:
+            return ' '.join(f'"{arg}"' for arg in args)
+        return args
