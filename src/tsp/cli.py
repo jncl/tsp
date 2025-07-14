@@ -273,9 +273,9 @@ def print_task_list(tasks, header, no_header):
             if t['finished_at'] and t['run_at']:
                 dur = t['finished_at'] - t['run_at']
             else:
-                dur = 0
+                dur = 0.0
 
-            print(f"   {t['id']}  {ts}  {dur}  {mark}   {t['command']}")
+            print(f"    {t['id']}  {ts}    {dur}    {mark}  {t['command']}")
 
 
 def run_command(command):
