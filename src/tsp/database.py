@@ -92,7 +92,7 @@ class DAL:
             if query.startswith('SELECT '):
                 rows = cur.fetchall()
                 names = [desc[0] for desc in cur.description]
-                return [dict(zip(names, row)) for row in rows], cur.rowcount
+                return [dict(zip(names, row)) for row in rows], len(rows)
             if query.startswith('INSERT '):
                 return cur.lastrowid
             return cur.rowcount

@@ -315,7 +315,7 @@ def main():
 def print_task_list(tasks, count, header, no_header):
     """ print tasks list """
 
-    print(f"print_task_list - Tasks: [{tasks}]\n{count}\n[{header}]\n[{no_header}]")
+    print(f"print_task_list - Tasks: [{tasks}]\n[{count}]\n[{header}]\n[{no_header}]")
 
     if not tasks:
         print(no_header)
