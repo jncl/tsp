@@ -248,9 +248,9 @@ class Database(DAL):
             'stderr': memoryview(coutput.stderr) if coutput.stderr else None,
             'result': coutput.rc,
             'finished_at': int(time.time()),
-            'time_r': ctime.rtimes,
-            'time_u': ctime.utimes,
-            'time_s': ctime.stimes,
+            'time_r': ctime.rtime,
+            'time_u': ctime.utime,
+            'time_s': ctime.stime,
         }, {
             'id': task_id,
         })

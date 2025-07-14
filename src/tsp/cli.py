@@ -26,7 +26,7 @@ class CalcTimes:
     stime = None
     rtime = None
 
-    def get_elapsed(then):
+    def get_elapsed(self, then):
         """ get elapsed times """
         now = os.times()
         self.utime = now[0] - then[0]
