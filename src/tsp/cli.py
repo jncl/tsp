@@ -275,7 +275,7 @@ def print_task_list(tasks, header, no_header):
             else:
                 dur = 0
 
-            print(f"{t['id']}  {ts}  {dur}  {mark}   {t['command']}")
+            print(f"   {t['id']}  {ts}  {dur}  {mark}   {t['command']}")
 
 
 def run_command(command):
