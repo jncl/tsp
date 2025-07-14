@@ -219,7 +219,6 @@ def find_executable(command):
 def main():
     """ process command line arguments """
     replace = False
-    task_id = None
 
     if len(sys.argv) - 1 == 0:
         return do_list_last()
@@ -232,11 +231,12 @@ def main():
         if arg == "--show":
             if len(sys.argv) -1 == 2:
                 task_id = sys.argv[idx+1:]
+                return do_show(task_id)
             else:
                 print("Missing Task ID")
                 continue
+        # handle other options
         return {
-            '--show': do_show(task_id),
             '--pending': do_list_pending(),
             '--finished': do_list_finished(),
             '--failed': do_list_failed(),
@@ -244,7 +244,6 @@ def main():
             '--run': do_run(),
             '--*': do_help(),
         }.get(arg)
-
 
 
 def print_task_list(tasks, header, no_header):
