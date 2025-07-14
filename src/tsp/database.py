@@ -76,7 +76,7 @@ class DAL:
             marks.append('?')
             params.append(v)
 
-        query = f"INSERT INTO {table} {(', '.join(fields))} VALUES {(', '.join(marks))}"
+        query = f"INSERT INTO {table} ({', '.join(fields)}) VALUES ({', '.join(marks)})"
         return self.query(query, params)
 
     def query(self, query, params=None):
