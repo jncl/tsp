@@ -1,6 +1,8 @@
 # vim: set ts=4 sts=4 sw=4 et tw=0 fileencoding=utf-8:
 """ CLI implementation """
 
+from optparse import OptionParser
+
 import errno
 import fcntl
 import os
@@ -217,32 +219,63 @@ def find_executable(command):
 
 
 def main():
-    """ process command line arguments """
-    replace = False
+    # """ process command line arguments """
+    # replace = False
 
-    if len(sys.argv) - 1 == 0:
-        return do_list_last()
-    for idx, arg in enumerate(sys.argv[1:]):
-        if arg == '--replace':
-            replace = True
-            continue
-        if not arg.startswith('--'):
-            return do_add(replace, [arg])
-        if arg == "--show":
-            if len(sys.argv) -1 == 2:
-                task_id = sys.argv[idx+1:]
-                return do_show(task_id)
-            print("Missing Task ID")
-            continue
-        # handle other options
-        return {
-            '--pending': do_list_pending(),
-            '--finished': do_list_finished(),
-            '--failed': do_list_failed(),
-            '--purge': do_purge(),
-            '--run': do_run(),
-            '--*': do_help(),
-        }.get(arg)
+    # if len(sys.argv) - 1 == 0:
+    #     return do_list_last()
+    # for idx, arg in enumerate(sys.argv[1:]):
+    #     if arg == '--replace':
+    #         replace = True
+    #         continue
+    #     if not arg.startswith('--'):
+    #         return do_add(replace, [arg])
+    #     if arg == "--show":
+    #         if len(sys.argv) -1 == 2:
+    #             task_id = sys.argv[idx+1:]
+    #             return do_show(task_id)
+    #         print("Missing Task ID")
+    #         continue
+    #     # handle other options
+    #     return {
+    #         '--pending': do_list_pending(),
+    #         '--finished': do_list_finished(),
+    #         '--failed': do_list_failed(),
+    #         '--purge': do_purge(),
+    #         '--run': do_run(),
+    #         '--*': do_help(),
+    #     }.get(arg)
+
+    parser = OptionParser()
+    parser.set_defaults(verbose=True)
+    parser.add_option("-v", "--verbose",
+                      action="store_true", dest="verbose",
+                      help="print status messages to stdout")
+    parser.add_option("-q", "--quiet",
+                      action="store_false", dest="verbose",
+                      help="don't print status messages to stdout")
+    parser.add_option("-a", "--add",
+                      dest="command",
+                      help="add a task to the queue")
+    parser.add_option("-r", "--replace",
+                      dest="command",
+                      help="add a task to the queue, removing any existing matching tasks")
+    parser.add_option("-s", "--show",
+                      help="list all tasks")
+    parser.add_option("-p", "--pending",
+                      help="list pending tasks")
+    parser.add_option("-e", "--finished",
+                      help="list finished tasks")
+    parser.add_option("-f", "--failed",
+                      help="list failed tasks")
+    parser.add_option("-d", "--purge",
+                      help="delete pending tasks")
+    parser.add_option("-r", "--run",
+                      help="run the daemon")
+
+    (options, args) = parser.parse_args()
+    if options.verbose:
+        print(f"Options: {options}\nArgs: {args}")
 
 
 def print_task_list(tasks, header, no_header):
@@ -275,7 +308,7 @@ def print_task_list(tasks, header, no_header):
             else:
                 dur = 0.0
 
-            print(f"    {t['id']}  {ts}    {dur}    {mark}  {t['command']}")
+            print(f"    {t['id']}  {ts}  {dur}    {mark} {t['command']}")
 
 
 def run_command(command):
