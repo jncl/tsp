@@ -1,6 +1,6 @@
 install: dist
 	./venv/bin/python -m pip install --upgrade --force-reinstall dist/tsp-*-py3-none-any.whl
-	./venv/bin/tsp --reload
+	./venv/bin/tsp reload
 
 dist:
 	rm -rf dist
