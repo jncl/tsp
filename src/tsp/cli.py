@@ -39,12 +39,11 @@ class CalcTimes:
 @dataclass
 class CmdOutput:
     """ Command return values """
-    self.rc = 0
-    self.stdout = None
-    self.stderr = None
+    rc = 0
+    stdout = None
+    stderr = None
 
-    @staticmethod
-    def get_result(returncode, output, error):
+    def get_result(self, returncode, output, error):
         """ return passed params """
         self.rc = returncode
         self.stdout = output
@@ -137,8 +136,8 @@ def do_run():
         logger.info(f"Running task {int(task['id'])}: {task['command']}")
 
         if task['command'] == 'reload':
-            db.set_finished(int(task['id']), CmdOutput.get_result(0, None, None),\
-                            CalcTimes.get_none())
+            cout = CmdOutput()
+            db.set_finished(int(task['id']), cout, CalcTimes.get_none())
             db.commit()
             logger.info('Reloading.')
             sys.exit(0)
@@ -319,5 +318,6 @@ def run_command(command):
     """ run command """
     command = command.split()
     command[0] = find_executable(command[0])
+    cout = CmdOutput()
     with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as p:
-        return CmdOutput.get_result(p.returncode, *(p.communicate()))
+        return cout.get_result(p.returncode, *(p.communicate()))
