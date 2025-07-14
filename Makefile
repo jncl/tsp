@@ -3,7 +3,7 @@ install: dist
 	./venv/bin/tsp --replace reload
 
 dist:
-	rm tsp.log
+	@[ -f ./tsp.log ] && rm tsp.log || true
 	rm -rf dist
 	./venv/bin/python -m build --sdist --wheel
 	rm -rf src/tsp.egg-info build
