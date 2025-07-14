@@ -1,5 +1,5 @@
 install: dist
-	./venv/bin/python -m pip install --upgrade dist/tsp-*-py3-none-any.whl
+	./venv/bin/python -m pip install --upgrade --force-reinstall dist/tsp-*-py3-none-any.whl
 	./venv/bin/tsp --reload
 
 dist:
