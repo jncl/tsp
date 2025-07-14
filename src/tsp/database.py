@@ -145,13 +145,9 @@ class Database(DAL):
 
     def add_task(self, command):
         """ add task """
-        if not isinstance(command, (list, tuple)):
-            logger.error('task command must be list of arguments')
-            raise ValueError('task command must be list of arguments')
-
-        # logger.debug(f"add_task#1: {command}")
-        # cmd_str = " ".join(command)
-        # logger.debug(f"add_task#2: {cmd_str}")
+        # if not isinstance(command, (list, tuple)):
+        #     logger.error('task command must be list of arguments')
+        #     raise ValueError('task command must be list of arguments')
 
         return self.insert('tasks', {
             'added_at': int(time.time()),
@@ -205,10 +201,6 @@ class Database(DAL):
 
     def replace_task(self, command):
         """ replace task """
-        if not isinstance(command, (list, tuple)):
-            logger.error('task command must be list of arguments')
-            raise ValueError('task command must be list of arguments')
-
         self.query('DELETE FROM tasks WHERE command = ?', command)
         return self.add_task(command)
 
