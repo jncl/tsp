@@ -47,7 +47,7 @@ class CmdOutput:
 def do_add(replace, command):
     """ Add command to database """
     if command is None:
-        logger.error('Command not specified.', file=sys.stderr)
+        logger.error('Command not specified.')
         sys.exit(1)
 
     with Database() as db:
