@@ -149,13 +149,13 @@ class Database(DAL):
             logger.error('task command must be list of arguments')
             raise ValueError('task command must be list of arguments')
 
-        logger.debug(f"add_task#1: {command}")
-        cmd_str = " ".join(command)
-        logger.debug(f"add_task#2: {cmd_str}")
+        # logger.debug(f"add_task#1: {command}")
+        # cmd_str = " ".join(command)
+        # logger.debug(f"add_task#2: {cmd_str}")
 
         return self.insert('tasks', {
             'added_at': int(time.time()),
-            'command': cmd_str,
+            'command': command,
             'status': 0,
         })
 
@@ -196,7 +196,7 @@ class Database(DAL):
     def purge_older(self):
         """ Delete tasks older than 1 week. """
         since = time.time() - 86400 * 7
-        count = self.query('DELETE FROM tasks WHERE added_at < ?', [since])
+        count = self.query('DELETE FROM tasks WHERE added_at < ?', since)
         return count
 
     def purge_pending(self):
@@ -209,13 +209,7 @@ class Database(DAL):
             logger.error('task command must be list of arguments')
             raise ValueError('task command must be list of arguments')
 
-        logger.debug(f"replace_task#1: {command}")
-        cmd_str = " ".join(command)
-        logger.debug(f"replace_task#2: {cmd_str}")
-
         self.query('DELETE FROM tasks WHERE command = ?', command)
-        # self.query('DELETE FROM tasks WHERE command = ?', cmd_str)
-        # self.query('DELETE FROM tasks WHERE command = ?', [command])
         return self.add_task(command)
 
     def reset_running(self):
