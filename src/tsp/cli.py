@@ -294,7 +294,7 @@ def main():
         return do_run()
     if opts.task_id:
         return do_show(opts.task_id)
-    if opts.command:
+    if opts.task:
         return do_add(opts.replace, opts.task)
 
 
