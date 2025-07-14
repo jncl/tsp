@@ -150,7 +150,6 @@ class Database(DAL):
             raise ValueError('task command must be list of arguments')
 
         logger.debug(f"add_task#1: {command}")
-        # command = self.shell_escape(command)
         cmd_str = " ".join(command)
         logger.debug(f"add_task#2: {cmd_str}")
 
@@ -270,9 +269,3 @@ class Database(DAL):
         }, {
             'id': task_id,
         })
-
-    def shell_escape(self, args):
-        """ shell escape """
-        if len(args) > 1:
-            return ' '.join(f'"{arg}"' for arg in args)
-        return args
