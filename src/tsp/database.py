@@ -213,7 +213,8 @@ class Database(DAL):
         cmd_str = " ".join(command)
         logger.debug(f"replace_task#2: {cmd_str}")
 
-        self.query('DELETE FROM tasks WHERE command = ?', cmd_str)
+        self.query('DELETE FROM tasks WHERE command = ?', command)
+        # self.query('DELETE FROM tasks WHERE command = ?', cmd_str)
         # self.query('DELETE FROM tasks WHERE command = ?', [command])
         return self.add_task(command)
 
