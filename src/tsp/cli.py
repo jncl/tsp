@@ -219,6 +219,7 @@ def find_executable(command):
 def main():
     """ process command line arguments """
     replace = False
+    task_id = None
 
     if len(sys.argv) - 1 == 0:
         return do_list_last()
