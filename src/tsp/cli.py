@@ -221,10 +221,10 @@ def main():
     parser.add_option("-q", "--quiet",
                       action="store_false", dest="verbose",
                       help="don't print status messages to stdout")
-    parser.add_option("-a", "--add",
-                      dest="task",
-                      help="add a task to the queue")
-    parser.add_option("-r", "--replace",
+    # parser.add_option("-a", "--add",
+    #                   dest="task",
+    #                   help="add a task to the queue")
+    parser.add_option("--replace",
                       action="store_true", dest="replace",
                       help="replace a task in the queue")
     parser.add_option("-s", "--show",
@@ -251,7 +251,7 @@ def main():
     if opts.verbose:
         logger.setLevel("DEBUG")
 
-    logger.debug(f"Options: {opts}\nArgs: {args}")
+    logger.debug(f"Options: {opts}, Args: {args}")
 
     if opts.pending:
         return do_list_pending()
@@ -265,12 +265,12 @@ def main():
         return do_run()
     if opts.task_id:
         return do_show(opts.task_id)
-    if opts.task:
-        return do_add(opts.replace, opts.task)
+    # if opts.task:
+    #     return do_add(, opts.task)
 
-    # add a task if supplied
+    # add a task
     if len(args) > 0:
-        return do_add(None, args)
+        return do_add(opts.replace, args)
 
     return do_list_last()
 
