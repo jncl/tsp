@@ -312,8 +312,7 @@ def print_task_list(tasks, header, no_header):
 
     # print(f"print_task_list - Tasks: [{tasks}]\n\n[{header}]\n\n[{no_header}]")
 
-    if len(tasks) == 0:
-    # if not tasks:
+    if not tasks:
         print(no_header)
 
     else:
@@ -337,6 +336,7 @@ def print_task_list(tasks, header, no_header):
             else:
                 dur = 0.0
 
+            # change the following print statement to allow for different width fields
             print(f"    {t['id']}  {ts}  {dur}    {mark} {t['command']}")
 
 
