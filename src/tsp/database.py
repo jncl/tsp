@@ -217,6 +217,8 @@ class Database(DAL):
 
     def set_failed(self, task_id, msg, ctime):
         """ set status to failed """
+        logger.debug(f"set_failed: [{task_id}], [{msg}], [{ctime}]")
+
         if not isinstance(task_id, int):
             logger.error('task_id must be an integer')
             raise ValueError('task_id must be an integer')
