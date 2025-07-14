@@ -28,3 +28,6 @@ Issues = "https://github.com/jncl/tsp/issues"
 
 [project.scripts]
 tsp = "tsp.cli:main"
+
+[tool.setuptools.dynamic]
+version = {attr = "tsp.__version__"}
