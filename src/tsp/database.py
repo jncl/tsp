@@ -196,7 +196,7 @@ class Database(DAL):
     def purge_older(self):
         """ Delete tasks older than 1 week. """
         since = time.time() - 86400 * 7
-        count = self.query('DELETE FROM tasks WHERE status = 2 AND added_at < ?', [since])
+        count = self.query('DELETE FROM tasks WHERE added_at < ?', [since])
         return count
 
     def purge_pending(self):
@@ -205,7 +205,7 @@ class Database(DAL):
 
     def replace_task(self, command):
         """ replace task """
-        self.query('DELETE FROM tasks WHERE status = 0 AND command = ?', [command])
+        self.query('DELETE FROM tasks WHERE command = ?', [command])
         return self.add_task(command)
 
     def reset_running(self):
