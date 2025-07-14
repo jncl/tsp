@@ -26,7 +26,7 @@ class Email:
 
         self.msg.set_content(body)
 
-        print(f"Email contents: {msg}")
+        print(f"Email contents: {self.msg}")
 
         # determine how to send an email
 
