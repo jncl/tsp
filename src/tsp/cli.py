@@ -54,14 +54,17 @@ class CmdOutput:
         return returncode, output, error
 
 
-def do_add(_replace, command):
+def do_add(replace, command):
     """ Add command to database """
     if command is None:
         print('Command not specified.', file=sys.stderr)
         sys.exit(1)
 
     with Database() as db:
-        task_id = db.add_task(command)
+        if replace:
+            task_id = db.replace_task(command)
+        else:
+            task_id = db.add_task(command)
 
     print(f'Task {task_id} added.')
 
@@ -258,9 +261,10 @@ def main():
                       dest="command",
                       help="add a task to the queue")
     parser.add_option("-r", "--replace",
-                      dest="command",
-                      help="add a task to the queue, removing any existing matching tasks")
+                      action="store_true", dest="replace",
+                      help="replace a task in the queue")
     parser.add_option("-s", "--show",
+                      action="store", type="int",
                       dest="task_id",
                       help="list all tasks")
     parser.add_option("-p", "--pending",
@@ -274,27 +278,27 @@ def main():
     parser.add_option("--run",
                       help="run the daemon")
 
-    (options, args) = parser.parse_args()
-    if options.verbose:
-        print(f"Options: {options}\nArgs: {args}")
+    (opts, args) = parser.parse_args()
+    if opts.verbose:
+        print(f"Options: {opts}\nArgs: {args}")
 
-    if options.show:
-        return do_show(options.task_id)
-    if options.pending:
+    if opts.show:
+        return do_show(opts.task_id)
+    if opts.pending:
         return do_list_pending()
-    if options.finished:
+    if opts.finished:
         return do_list_finished()
-    if options.failed:
+    if opts.failed:
         return do_list_failed()
-    if options.purge:
+    if opts.purge:
         return do_purge()
-    if options.run:
+    if opts.run:
         return do_run()
-    if options.replace:
-        return do_add(True, options.command)
-    if options.add:
-        return do_add(options.command)
+    if opts.add or opts.replace:
+        return do_add(opts.replace, opts.command)
 
+    if opts.verbose:
+        print(f"No option supplied\nArgs: {args}")
 
 
 def print_task_list(tasks, header, no_header):
