@@ -291,27 +291,43 @@ def print_task_list(tasks, count, header, no_header):
 
     else:
         print(f'--- {header} ---')
-        print('   id  date   time   dur  res command')
-        print('----- ------ ------ ---- ---- -----------------')
+        # print('   id  date   time   dur  res command')
+        # print('----- ------ ------ ---- ---- -----------------')
+        # for t in tasks:
+            # ts = time.strftime('%d.%m  %H:%M', time.localtime(t['finished_at']))
+            # if t['status'] == 0:
+            #     mark = '-'
+            # elif t['status'] == 1:
+            #     mark = '*'
+            # elif t['result'] == 0:
+            #     mark = '✓'
+            # else:
+            #     mark = 'x'
+            # if t['finished_at'] and t['run_at']:
+            #     dur = t['finished_at'] - t['run_at']
+            # else:
+            #     dur = 0.0
+
+            # print(f"    {t['id']}  {ts}  {dur}    {mark} {t['command']}")
+
+        # Original output from tsn
+        # ID   State      Output               E-Level  Times(r/u/s)   Command [run=0/4]
+        print('ID   State      E-Level  Times(r/u/s)   Command')
+
         for t in tasks:
-            ts = time.strftime('%d.%m  %H:%M', time.localtime(t['finished_at']))
-
-            if t['status'] == 0:
-                mark = '-'
+             if t['status'] == 0:
+                state = 'waiting'
             elif t['status'] == 1:
-                mark = '*'
-            elif t['result'] == 0:
-                mark = '✓'
+                state = 'finished'
             else:
-                mark = 'x'
+                state = 'failed'
 
-            if t['finished_at'] and t['run_at']:
-                dur = t['finished_at'] - t['run_at']
-            else:
-                dur = 0.0
-
-            # change the following print statement to allow for different width fields
-            print(f"    {t['id']}  {ts}  {dur}    {mark} {t['command']}")
+            print(f"{t['id']}\
+                {state}\
+                {t['result']}\
+                {t['time_r']/t['time_u']/t['time_s']}\
+                {t['command']}"\
+            )
 
 
 def run_command(command):
