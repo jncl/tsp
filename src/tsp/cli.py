@@ -20,24 +20,30 @@ logger = logging.getLogger(__name__)
 @dataclass
 class CalcTimes:
     """ Calculated Times """
+    utime = None
+    stime = None
+    rtime = None
     def get_elapsed(self, then):
         """ get elapsed times """
         now = os.times()
         self.utime = now[0] - then[0]
         self.stime = now[1] - then[1]
         self.rtime = now[4] - then[4]
-        # return self
+        return self
 
 
 @dataclass
 class CmdOutput:
     """ Command return values """
+    rc = 0
+    stdout = None
+    stderr = None
     def get_result(self, returncode, output, error):
         """ use passed params """
         self.rc = returncode
         self.stdout = output
         self.stderr = error
-        # return self
+        return self
 
 
 def do_add(replace, command):
