@@ -5,6 +5,7 @@
 # using info from here: https://realpython.com/python-send-email/
 
 import logging
+import os
 import subprocess
 
 from email.message import EmailMessage
@@ -13,7 +14,7 @@ from dataclasses import dataclass
 logger = logging.getLogger(__name__)
 
 SENDMAIL_LOCATION = "/usr/sbin/sendmail"
-RECIPIENT_EMAIL = "hogg.jon+tsp@gmail.com"
+RECIPIENT_EMAIL = os.getenv('TS_MAILTO')
 
 @dataclass
 class Email:
