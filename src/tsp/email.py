@@ -32,7 +32,8 @@ class Email:
         logger.debug(f"Email contents: {msg}")
 
         try:
-            subprocess.run([SENDMAIL_LOCATION, "-t", "-oi"], input=msg.as_bytes(), check=True)
+            subprocess.run([SENDMAIL_LOCATION], input=msg.as_bytes(), check=True)
+            # subprocess.run([SENDMAIL_LOCATION, "-t", "-oi"], input=msg.as_bytes(), check=True)
         except Exception as e:
             logger.error(f"Email send error: {e}")
             raise
