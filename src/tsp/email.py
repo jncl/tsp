@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 msg = EmailMessage()
 SENDMAIL_LOCATION = "/usr/sbin/sendmail"
-
+RECIPIENT_EMAIL = "hogg.jon+tsp@gmail.com"
 
 @dataclass
 class Email:
@@ -27,13 +27,12 @@ class Email:
         msg['Subject'] = msg_subject
         msg.set_content(msg_body)
         # msg['From'] = from_addr
-        # msg['To'] = to_addrs
+        msg['To'] = RECIPIENT_EMAIL
 
         logger.debug(f"Email contents: {msg}")
 
         try:
-            subprocess.run([SENDMAIL_LOCATION], input=msg.as_bytes(), check=True)
-            # subprocess.run([SENDMAIL_LOCATION, "-t", "-oi"], input=msg.as_bytes(), check=True)
+            subprocess.run([SENDMAIL_LOCATION, "-t", "-oi"], input=msg.as_bytes(), check=True)
         except Exception as e:
             logger.error(f"Email send error: {e}")
             raise
