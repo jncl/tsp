@@ -143,7 +143,7 @@ class Database(DAL):
             logger.error('task command must be list of arguments')
             raise ValueError('task command must be list of arguments')
 
-        cmd_str = '"' + ' '.join(str(x) for x in command) + '"'
+        cmd_str = ' '.join(str(x) for x in command)
         logger.debug(f"add_task - command: {command}, cmd_str: {cmd_str}")
 
         return self.insert('tasks', {
@@ -202,7 +202,7 @@ class Database(DAL):
             logger.error('task command must be list of arguments')
             raise ValueError('task command must be list of arguments')
 
-        cmd_str = '"' + ' '.join(str(x) for x in command) + '"'
+        cmd_str = ' '.join(str(x) for x in command)
         logger.debug(f"replace_task - command: {command}, cmd_str: {cmd_str}")
 
         self.query('DELETE FROM tasks WHERE command = ?', [cmd_str])
