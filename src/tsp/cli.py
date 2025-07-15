@@ -328,7 +328,7 @@ def print_task_list(tasks, count, header, no_header):
             print(f"{t['id']}\
                 {state}\
                 {t['result']}\
-                {t['time_r']/t['time_u']/t['time_s']}\
+                {t['time_r']}/{t['time_u']}/{t['time_s']}\
                 {t['command']}"\
             )
 
