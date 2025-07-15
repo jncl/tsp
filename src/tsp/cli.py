@@ -315,7 +315,7 @@ def print_task_list(tasks, count, header, no_header):
         print('ID   State      E-Level  Times(r/u/s)   Command')
 
         for t in tasks:
-             if t['status'] == 0:
+            if t['status'] == 0:
                 state = 'waiting'
             elif t['status'] == 1:
                 state = 'finished'
