@@ -136,10 +136,10 @@ def do_run():
             time.sleep(1)
             continue
 
-        cmd_str = " ".join(task['command'])
-        logger.info(f"Running task {int(task['id'])}: {cmd_str}")
+        # cmd_str = " ".join(task['command'])
+        logger.info(f"Running task {int(task['id'])}: {task['command']}")
 
-        if cmd_str == 'reload':
+        if task['command'] == 'reload':
             db.set_finished(int(task['id']), CmdOutput(), CalcTimes())
             db.commit()
             logger.info('Reloading Tasks.')
@@ -152,7 +152,7 @@ def do_run():
 
         ctim = CalcTimes()
         try:
-            subprocess.run([cmd_str], check=True)
+            subprocess.run([task['command']], check=True)
             db.set_finished(int(task['id']), run_command(task['command']),\
                             ctim.get_elapsed(times))
             logger.info(f"Task {int(task['id'])} finished.")
