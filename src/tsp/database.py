@@ -201,7 +201,7 @@ class Database(DAL):
             logger.error('task command must be list of arguments')
             raise ValueError('task command must be list of arguments')
 
-       self.query('DELETE FROM tasks WHERE command = ?', [command])
+        self.query('DELETE FROM tasks WHERE command = ?', [command])
         return self.add_task(command)
 
     def reset_running(self):
