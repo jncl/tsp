@@ -251,8 +251,8 @@ class Database(DAL):
 
         return self.update('tasks', {
             'status': 2,
-            'stdout': coutput.stdout if coutput.stdout else None,
-            'stderr': coutput.stderr if coutput.stderr else None,
+            'stdout': coutput.stdout if coutput and coutput.stdout else None,
+            'stderr': coutput.stderr if coutput and coutput.stderr else None,
             'result': coutput.rc,
             'finished_at': int(time.time()),
             'time_r': ctime.rtime,

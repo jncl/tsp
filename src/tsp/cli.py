@@ -136,25 +136,24 @@ def do_run():
 
         logger.info(f"Running task {int(task['id'])}: {task['command']}")
 
+        ctim = CalcTimes()
+
         if task['command'] == 'reload':
-            db.set_finished(int(task['id']), task['command'], None, None)
+            db.set_finished(int(task['id']), task['command'], None, ctim.get_elapsed(os.times()))
             db.commit()
             logger.info('Reloading Tasks.')
             sys.exit(0)
 
-        times = os.times()
-
         db.set_running(int(task['id']))
         db.commit()
 
-        ctim = CalcTimes()
         try:
             output = run_command(task['command'])
             logger.debug(f"do_run: command: {task['command']}, output: {output}")
-            db.set_finished(int(task['id']), task['command'], output, ctim.get_elapsed(times))
+            db.set_finished(int(task['id']), task['command'], output, ctim.get_elapsed(os.times()))
             logger.info(f"Task {int(task['id'])} finished.")
         except (ValueError, sqlite3.Error) as e:
-            db.set_failed(int(task['id']), task['command'], str(e), ctim.get_elapsed(times))
+            db.set_failed(int(task['id']), task['command'], str(e), ctim.get_elapsed(os.times()))
             logger.error(f"Task {int(task['id'])} failed: {e}.")
 
         db.commit()
