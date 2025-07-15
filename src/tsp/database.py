@@ -215,7 +215,7 @@ class Database(DAL):
             logger.error('task_id must be an integer')
             raise ValueError('task_id must be an integer')
 
-        Email.send_mail("Task Failed", f"Task id: {task_id}\n\nMessage:\n{memoryview(msg)}")
+        Email.send_mail("Task Failed", f"Task id: {task_id}\n\nOutput: {memoryview(msg)}")
 
         return self.update('tasks', {
             'status': 2,
@@ -240,7 +240,7 @@ class Database(DAL):
         mvout = memoryview(coutput.stdout) if coutput.stdout else None
         mverr = memoryview(coutput.stderr) if coutput.stderr else None
 
-        Email.send_mail("Task Finished", f"Task id: {task_id}\nMessage:\n{mvout}\n{mverr}")
+        Email.send_mail("Task Finished", f"Task id: {task_id}\n\nOutput: {mvout}\n\nError: {mverr}")
 
         return self.update('tasks', {
             'status': 2,
