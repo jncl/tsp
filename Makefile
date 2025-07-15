@@ -3,6 +3,7 @@ install: dist
 	./venv/bin/tsp --replace reload
 
 dist:
+	@[ -f ~/.local/share/tsp/tasks.db ] && rm ~/.local/share/tsp/tasks.db || true
 	@[ -f ./tsp.log ] && rm tsp.log || true
 	rm -rf dist
 	./venv/bin/python -m build --sdist --wheel
