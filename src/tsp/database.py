@@ -223,11 +223,11 @@ class Database(DAL):
             logger.error('task_id must be an integer')
             raise ValueError('task_id must be an integer')
 
-        Email.send_mail("Task Failed", f"Task id: {task_id}\n\nOutput: {memoryview(msg)}")
+        Email.send_mail("Task Failed", f"Task id: {task_id}\n\nOutput: {msg}")
 
         return self.update('tasks', {
             'status': 2,
-            'stderr': memoryview(msg),
+            'stderr': msg,
             'result': -1,
             'finished_at': int(time.time()),
             'time_r': ctime.rtime,
@@ -245,15 +245,12 @@ class Database(DAL):
             logger.error('task_id must be an integer')
             raise ValueError('task_id must be an integer')
 
-        mvout = memoryview(coutput.stdout) if coutput.stdout else None
-        mverr = memoryview(coutput.stderr) if coutput.stderr else None
-
-        Email.send_mail("Task Finished", f"Task id: {task_id}\n\nOutput: {mvout}\n\nError: {mverr}")
+        Email.send_mail("Task Finished", f"Task id: {task_id}\nOutput: {coutput.stdout}\nError: {coutput.stderr}")
 
         return self.update('tasks', {
             'status': 2,
-            'stdout': mvout,
-            'stderr': mverr,
+            'stdout': coutput.stdout if coutput.stdout else None,
+            'stderr': coutput.stderr if coutput.stderr else None,
             'result': coutput.rc,
             'finished_at': int(time.time()),
             'time_r': ctime.rtime,
