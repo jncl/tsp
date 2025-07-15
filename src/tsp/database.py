@@ -164,26 +164,22 @@ class Database(DAL):
 
     def list_failed_tasks(self):
         """ list failed tasks """
-        rows = self.query('SELECT id, run_at, added_at, finished_at, command, status,\
-            result FROM tasks WHERE status = 2 AND result <> 0 ORDER BY id')
+        rows = self.query('SELECT * FROM tasks WHERE status = 2 AND result <> 0 ORDER BY id')
         return rows, len(rows)
 
     def list_finished_tasks(self):
         """ list finished tasks """
-        rows = self.query('SELECT id, run_at, added_at, finished_at, command, status,\
-            result FROM tasks WHERE status = 2 AND result = 0 ORDER BY id')
+        rows = self.query('SELECT * FROM tasks WHERE status = 2 AND result = 0 ORDER BY id')
         return rows, len(rows)
 
     def list_last_tasks(self):
         """ list last tasks """
-        rows = self.query('SELECT id, run_at, added_at, finished_at, command, status,\
-            result FROM tasks ORDER BY id DESC LIMIT 50')
+        rows = self.query('SELECT * FROM tasks ORDER BY id DESC LIMIT 50')
         return reversed(rows), len(rows)
 
     def list_pending_tasks(self):
         """ list pending tasks """
-        rows = self.query('SELECT id, run_at, added_at, finished_at, command, status,\
-            result FROM tasks WHERE status = 0 ORDER BY id')
+        rows = self.query('SELECT * FROM tasks WHERE status = 0 ORDER BY id')
         return rows, len(rows)
 
     def purge_older(self):

@@ -316,8 +316,10 @@ def print_task_list(tasks, count, header, no_header):
 
         for t in tasks:
             if t['status'] == 0:
-                state = 'waiting'
+                state = 'pending'
             elif t['status'] == 1:
+                state = 'running'
+            elif t['status'] == 2:
                 state = 'finished'
             else:
                 state = 'failed'
