@@ -5,14 +5,13 @@
 import logging
 
 import os
-import sys
 import time
-
-__all__ = ['Database']
 
 from sqlite3 import dbapi2 as sqlite
 
 from tsp.email import Email
+
+__all__ = ['Database']
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +27,7 @@ DB_PATH = os.path.expanduser('~/.local/share/tsp/tasks.db')
 
 
 class DAL:
-    """ Abstraction layer """
+    """ Database Abstraction Layer """
     def __del__(self):
         self.rollback()
 
@@ -106,11 +105,9 @@ class DAL:
             if query.startswith('INSERT '):
                 return cur.lastrowid
             return cur.rowcount
-
         except:
             self.log_exception(f'failed SQL statement: {query}, params: {params}')
             raise
-
         finally:
             cur.close()
 
@@ -138,7 +135,6 @@ class DAL:
             query += f" WHERE {' AND '.join(where)}"
 
         return self.query(query, params)
-
 
 class Database(DAL):
     """ Database class """
@@ -207,8 +203,8 @@ class Database(DAL):
     def reset_running(self):
         """ reset running tasks """
         self.query('UPDATE tasks SET status = 0 WHERE status = 1')
-        em = Email()
-        em.send_mail("Running Tasks reset",\
+
+        Email.send_mail("Running Tasks reset",\
                     "All running tasks were reset, please check them and re-run as necessary")
 
     def set_failed(self, task_id, msg, ctime):
@@ -219,8 +215,7 @@ class Database(DAL):
             logger.error('task_id must be an integer')
             raise ValueError('task_id must be an integer')
 
-        em = Email()
-        em.send_mail("Task Failed", f"Task id: {task_id}\n\nMessage:\n{memoryview(msg)}")
+        Email.send_mail("Task Failed", f"Task id: {task_id}\n\nMessage:\n{memoryview(msg)}")
 
         return self.update('tasks', {
             'status': 2,
@@ -242,10 +237,15 @@ class Database(DAL):
             logger.error('task_id must be an integer')
             raise ValueError('task_id must be an integer')
 
+        mvout = memoryview(coutput.stdout) if coutput.stdout else None
+        mverr = memoryview(coutput.stderr) if coutput.stderr else None
+
+        Email.send_mail("Task Finished", f"Task id: {task_id}\nMessage:\n{mvout}\n{mverr}")
+
         return self.update('tasks', {
             'status': 2,
-            'stdout': memoryview(coutput.stdout) if coutput.stdout else None,
-            'stderr': memoryview(coutput.stderr) if coutput.stderr else None,
+            'stdout': mvout,
+            'stderr': mverr,
             'result': coutput.rc,
             'finished_at': int(time.time()),
             'time_r': ctime.rtime,

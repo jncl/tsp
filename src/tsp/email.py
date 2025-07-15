@@ -2,40 +2,37 @@
 # vim: set ts=4 sts=4 sw=4 et tw=0:
 """ Email module """
 
+# using info from here: https://realpython.com/python-send-email/
+
 import logging
 
-import os
-
-# Import smtplib for the actual sending function
-import smtplib
-
-# Import the email modules we'll need
+import subprocess
 from email.message import EmailMessage
 
 from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 
+msg = EmailMessage()
+SENDMAIL_LOCATION = "/usr/sbin/sendmail"
+
+
 @dataclass
 class Email:
     """ email class """
-    def __init__(self):
-    	# Create the container email message.
-        self.msg = EmailMessage()
-
-    def send_mail(self, subject, body):
+    @staticmethod
+    def send_mail(msg_subject, msg_body):
         """ send an email """
 
-        self.msg['Subject'] = subject
-        self.msg['From'] = "hogg.jon+tsp@gmail.com"
-        self.msg['To'] = os.getenv("TS_MAILTO")
+        msg['Subject'] = msg_subject
+        msg.set_content(msg_body)
+        # msg['From'] = from_addr
+        # msg['To'] = to_addrs
 
-        self.msg.set_content(body)
+        logger.debug(f"Email contents: {msg}")
 
-        logger.debug(f"Email contents: {self.msg}")
-
-        # determine how to send an email
-
-    	# # Send the email via our own SMTP server.
-        # with smtplib.SMTP('localhost') as s:
-        #     s.send_message(self.msg)
+        try:
+            subprocess.run([SENDMAIL_LOCATION, "-t", "-oi"], input=msg.as_bytes(), check=True)
+        except Exception as e:
+            logger.error(f"Email send error: {e}")
+            raise
