@@ -247,7 +247,7 @@ class Database(DAL):
 
         if not command == 'reload':
             Email.send_mail("Task Finished", f"Task id: {task_id}\nTask: {command}\n\
-                            Output: {coutput.stdout}\nError: {coutput.stderr}")
+                Output:\n{coutput.stdout}")
 
         return self.update('tasks', {
             'status': 2,
