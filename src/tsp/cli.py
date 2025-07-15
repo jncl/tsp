@@ -136,10 +136,12 @@ def do_run():
 
         logger.info(f"Running task {int(task['id'])}: {task['command']}")
 
+        cout = CmdOutput()
         ctim = CalcTimes()
 
         if task['command'] == 'reload':
-            db.set_finished(int(task['id']), task['command'], None, ctim.get_elapsed(os.times()))
+            db.set_finished(int(task['id']), task['command'],
+                            cout.get_result(0, None, None), ctim.get_elapsed(os.times()))
             db.commit()
             logger.info('Reloading Tasks.')
             sys.exit(0)
