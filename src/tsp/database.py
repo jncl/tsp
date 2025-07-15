@@ -197,7 +197,7 @@ class Database(DAL):
 
     def replace_task(self, command):
         """ replace task """
-         if not isinstance(command, (list, tuple)):
+        if not isinstance(command, (list, tuple)):
             logger.error('task command must be list of arguments')
             raise ValueError('task command must be list of arguments')
 
