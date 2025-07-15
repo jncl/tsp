@@ -19,6 +19,7 @@ from tsp.database import Database
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class CalcTimes:
     """ Calculated Times """
@@ -34,6 +35,7 @@ class CalcTimes:
         self.rtime = now[4] - then[4]
         return self
 
+
 @dataclass
 class CmdOutput:
     """ Command return values """
@@ -42,11 +44,12 @@ class CmdOutput:
     stderr = None
 
     def get_result(self, returncode, output, error):
-        """ return passed params """
+        """ use passed params """
         self.rc = returncode
         self.stdout = output
         self.stderr = error
         return self
+
 
 def do_add(replace, command):
     """ Add command to database """
@@ -103,7 +106,12 @@ def do_purge():
 
 
 def do_run():
-    """ run scheduler process """
+    """
+        Runs scheduler process
+
+        This should normally be done from a systemd unit
+
+    """
     try:
         lock = os.path.expanduser('~/.cache/tsp.lock')
         with open(lock, 'w', encoding="utf-8") as flock:
@@ -131,14 +139,13 @@ def do_run():
             time.sleep(1)
             continue
 
-        logger.info(f"Running task {int(task['id'])}: {task['command']}")
+        cmd_str = " ".join(task['command'])
+        logger.info(f"Running task {int(task['id'])}: {cmd_str}")
 
-        if task['command'] == 'reload':
-            cout = CmdOutput()
-            ctim = CalcTimes()
-            db.set_finished(int(task['id']), cout, ctim)
+        if cmd_str == 'reload':
+            db.set_finished(int(task['id']), CmdOutput(), CalcTimes())
             db.commit()
-            logger.info('Reloading.')
+            logger.info('Reloading Tasks.')
             sys.exit(0)
 
         times = os.times()
@@ -148,6 +155,7 @@ def do_run():
 
         ctim = CalcTimes()
         try:
+            subprocess.run([cmd_str], check=True)
             db.set_finished(int(task['id']), run_command(task['command']),\
                             ctim.get_elapsed(times))
             logger.info(f"Task {int(task['id'])} finished.")

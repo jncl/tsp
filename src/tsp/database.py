@@ -137,13 +137,13 @@ class DAL:
         return self.query(query, params)
 
 class Database(DAL):
-    """ Database class """
+    """ Database methods """
 
     def add_task(self, command):
         """ add task """
-        # if not isinstance(command, (list, tuple)):
-        #     logger.error('task command must be list of arguments')
-        #     raise ValueError('task command must be list of arguments')
+        if not isinstance(command, (list, tuple)):
+            logger.error('task command must be list of arguments')
+            raise ValueError('task command must be list of arguments')
 
         return self.insert('tasks', {
             'added_at': int(time.time()),
@@ -197,7 +197,11 @@ class Database(DAL):
 
     def replace_task(self, command):
         """ replace task """
-        self.query('DELETE FROM tasks WHERE command = ?', [command])
+         if not isinstance(command, (list, tuple)):
+            logger.error('task command must be list of arguments')
+            raise ValueError('task command must be list of arguments')
+
+       self.query('DELETE FROM tasks WHERE command = ?', [command])
         return self.add_task(command)
 
     def reset_running(self):
@@ -257,6 +261,8 @@ class Database(DAL):
 
     def set_running(self, task_id):
         """ set status to running """
+        logger.debug(f"set_running: [{task_id}]")
+
         if not isinstance(task_id, int):
             logger.error('task_id must be an integer')
             raise ValueError('task_id must be an integer')
