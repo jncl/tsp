@@ -3,22 +3,19 @@
 """ CLI implementation """
 
 import logging
-
-from optparse import OptionParser
-
 import errno
 import fcntl
 import os
 import subprocess
 import sys
 import time
-
-from dataclasses import dataclass
 import sqlite3
+
+from optparse import OptionParser
+from dataclasses import dataclass
 from tsp.database import Database
 
 logger = logging.getLogger(__name__)
-
 
 @dataclass
 class CalcTimes:
@@ -222,10 +219,11 @@ def find_executable(command):
     logger.error(f'command {base} not found')
     raise RuntimeError(f'command {base} not found')
 
+
 def main():
     """ process command line arguments """
 
-    logging.basicConfig(filename='tsp.log', level=logging.INFO)
+    # logging.basicConfig(filename='tsp.log', level=logging.INFO)
 
     parser = OptionParser()
     parser.set_defaults(verbose=True)
@@ -330,3 +328,4 @@ def run_command(command):
     cout = CmdOutput()
     with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as p:
         return cout.get_result(p.returncode, *(p.communicate()))
+

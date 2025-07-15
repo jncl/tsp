@@ -5,10 +5,9 @@
 # using info from here: https://realpython.com/python-send-email/
 
 import logging
-
 import subprocess
-from email.message import EmailMessage
 
+from email.message import EmailMessage
 from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)

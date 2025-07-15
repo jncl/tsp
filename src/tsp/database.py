@@ -3,17 +3,15 @@
 """ Database functions"""
 
 import logging
-
 import os
 import time
 
 from sqlite3 import dbapi2 as sqlite
-
 from tsp.email import Email
 
-__all__ = ['Database']
-
 logger = logging.getLogger(__name__)
+
+__all__ = ['Database']
 
 
 BOOTSTRAP = [
