@@ -223,8 +223,6 @@ def find_executable(command):
 def main():
     """ process command line arguments """
 
-    # logging.basicConfig(filename='tsp.log', level=logging.INFO)
-
     parser = OptionParser()
     parser.set_defaults(verbose=True)
     parser.add_option("-v", "--verbose",
@@ -277,13 +275,10 @@ def main():
         return do_run()
     if opts.task_id:
         return do_show(opts.task_id)
-    # if opts.task:
-    #     return do_add(, opts.task)
 
     # add a task
     if len(args) > 0:
         return do_add(opts.replace, args)
-        # return do_add(opts.replace, " ".join(str(x) for x in args))
 
     return do_list_last()
 
