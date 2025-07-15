@@ -246,8 +246,8 @@ class Database(DAL):
             raise ValueError('task_id must be an integer')
 
         if not command == 'reload':
-            Email.send_mail("Task Finished", f"Task id: {task_id}\nTask: {command}\n\
-                Output:\n{coutput.stdout}")
+            Email.send_mail(f"the task {task_id} finished with error {coutput.rc}",
+                f"Command: {command}\nOutput:{coutput.stdout}")
 
         return self.update('tasks', {
             'status': 2,
