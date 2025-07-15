@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-print("__main__.py run")
+print(f"__main__.py run: {__name__}")
 
 def main():
     print('OK')

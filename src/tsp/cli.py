@@ -17,6 +17,8 @@ from tsp.database import Database
 
 logger = logging.getLogger(__name__)
 
+print(f"cli.py run: {__name__}")
+
 @dataclass
 class CalcTimes:
     """ Calculated Times """

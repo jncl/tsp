@@ -12,6 +12,8 @@ from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 
+print(f"email.py run: {__name__}")
+
 SENDMAIL_LOCATION = "/usr/sbin/sendmail"
 RECIPIENT_EMAIL = "hogg.jon+tsp@gmail.com"
 

@@ -11,6 +11,8 @@ from tsp.email import Email
 
 logger = logging.getLogger(__name__)
 
+print(f"database.py run: {__name__}")
+
 __all__ = ['Database']
 
 
