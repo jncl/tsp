@@ -319,6 +319,7 @@ def run_command(command):
     """ run command """
     command = command.split()
     command[0] = find_executable(command[0])
+    logger.debug(f"run_command - command: {command}")
     cout = CmdOutput()
-    with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as p:
+    with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True) as p:
         return cout.get_result(p.returncode, *(p.communicate()))
