@@ -136,7 +136,6 @@ def do_run():
             time.sleep(1)
             continue
 
-        # cmd_str = " ".join(task['command'])
         logger.info(f"Running task {int(task['id'])}: {task['command']}")
 
         if task['command'] == 'reload':
@@ -152,9 +151,9 @@ def do_run():
 
         ctim = CalcTimes()
         try:
-            subprocess.run([task['command']], check=True)
-            db.set_finished(int(task['id']), run_command(task['command']),\
-                            ctim.get_elapsed(times))
+            output = run_command(task['command'])
+            logger.debug(f"do_run: command: {task['command']}, output: {output}")
+            db.set_finished(int(task['id']),output, ctim.get_elapsed(times))
             logger.info(f"Task {int(task['id'])} finished.")
         except (ValueError, sqlite3.Error) as e:
             db.set_failed(int(task['id']), str(e), ctim.get_elapsed(times))
