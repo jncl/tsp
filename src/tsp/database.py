@@ -215,15 +215,15 @@ class Database(DAL):
         Email.send_mail("Running Tasks reset",\
                     "All running tasks were reset, please check them and re-run as necessary")
 
-    def set_failed(self, task_id, msg, ctime):
+    def set_failed(self, task_id, command, msg, ctime):
         """ set status to failed """
-        logger.debug(f"set_failed: [{task_id}], [{msg}], [{ctime}]")
+        logger.debug(f"set_failed: [{task_id}], [{command}], [{msg}], [{ctime}]")
 
         if not isinstance(task_id, int):
             logger.error('task_id must be an integer')
             raise ValueError('task_id must be an integer')
 
-        Email.send_mail("Task Failed", f"Task id: {task_id}\n\nOutput: {msg}")
+        Email.send_mail("Task Failed", f"Task id: {task_id}\nTask: {command}\nOutput: {msg}")
 
         return self.update('tasks', {
             'status': 2,
@@ -237,15 +237,17 @@ class Database(DAL):
             'id': task_id,
         })
 
-    def set_finished(self, task_id, coutput, ctime):
+    def set_finished(self, task_id, command, coutput, ctime):
         """ set status to finished """
-        logger.debug(f"set_finished: [{task_id}], [{coutput}], [{ctime}]")
+        logger.debug(f"set_finished: [{task_id}], [{command}], [{coutput}], [{ctime}]")
 
         if not isinstance(task_id, int):
             logger.error('task_id must be an integer')
             raise ValueError('task_id must be an integer')
 
-        Email.send_mail("Task Finished", f"Task id: {task_id}\nOutput: {coutput.stdout}\nError: {coutput.stderr}")
+        if not command == 'reload':
+            Email.send_mail("Task Finished", f"Task id: {task_id}\nTask: {command}\n\
+                            Output: {coutput.stdout}\nError: {coutput.stderr}")
 
         return self.update('tasks', {
             'status': 2,

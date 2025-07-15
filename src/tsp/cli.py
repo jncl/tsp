@@ -20,9 +20,10 @@ logger = logging.getLogger(__name__)
 @dataclass
 class CalcTimes:
     """ Calculated Times """
-    utime = None
-    stime = None
-    rtime = None
+    def __init__(self):
+        self.utime = None
+        self.stime = None
+        self.rtime = None
 
     def get_elapsed(self, then):
         """ get elapsed times """
@@ -30,22 +31,23 @@ class CalcTimes:
         self.utime = now[0] - then[0]
         self.stime = now[1] - then[1]
         self.rtime = now[4] - then[4]
-        return self
+        # return self
 
 
 @dataclass
 class CmdOutput:
     """ Command return values """
-    rc = 0
-    stdout = None
-    stderr = None
+    def __init__(self):
+        self.rc = 0
+        self.stdout = None
+        self.stderr = None
 
     def get_result(self, returncode, output, error):
         """ use passed params """
         self.rc = returncode
         self.stdout = output
         self.stderr = error
-        return self
+        # return self
 
 
 def do_add(replace, command):
@@ -139,7 +141,9 @@ def do_run():
         logger.info(f"Running task {int(task['id'])}: {task['command']}")
 
         if task['command'] == 'reload':
-            db.set_finished(int(task['id']), CmdOutput(), CalcTimes())
+            cout = CmdOutput()
+            ctim = CalcTimes()
+            db.set_finished(int(task['id']), task['command'], cout, ctim)
             db.commit()
             logger.info('Reloading Tasks.')
             sys.exit(0)
@@ -153,10 +157,10 @@ def do_run():
         try:
             output = run_command(task['command'])
             logger.debug(f"do_run: command: {task['command']}, output: {output}")
-            db.set_finished(int(task['id']),output, ctim.get_elapsed(times))
+            db.set_finished(int(task['id']),task['command'], output, ctim.get_elapsed(times))
             logger.info(f"Task {int(task['id'])} finished.")
         except (ValueError, sqlite3.Error) as e:
-            db.set_failed(int(task['id']), str(e), ctim.get_elapsed(times))
+            db.set_failed(int(task['id']), task['command'], str(e), ctim.get_elapsed(times))
             logger.error(f"Task {int(task['id'])} failed: {e}.")
 
         db.commit()
