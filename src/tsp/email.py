@@ -13,7 +13,6 @@ from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 
-msg = EmailMessage()
 SENDMAIL_LOCATION = "/usr/sbin/sendmail"
 RECIPIENT_EMAIL = "hogg.jon+tsp@gmail.com"
 
@@ -24,6 +23,7 @@ class Email:
     def send_mail(msg_subject, msg_body):
         """ send an email """
 
+        msg = EmailMessage()
         msg['Subject'] = msg_subject
         msg.set_content(msg_body)
         # msg['From'] = from_addr
