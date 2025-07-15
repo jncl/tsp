@@ -322,4 +322,3 @@ def run_command(command):
     cout = CmdOutput()
     with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as p:
         return cout.get_result(p.returncode, *(p.communicate()))
-
