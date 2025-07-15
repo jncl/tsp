@@ -1,9 +1,5 @@
-
-print(f"__init__.py run: {__name__}")
-
 """ Setup logging for all modules """
 import logging
-import sys
 logger = logging.getLogger(__name__)
 
 logging.basicConfig(filename='tsp.log', level=logging.DEBUG)
@@ -14,4 +10,3 @@ logging.basicConfig(filename='tsp.log', level=logging.DEBUG)
 
 # Set version
 __version__ =  "2.0"
-
