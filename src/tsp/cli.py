@@ -20,11 +20,6 @@ logger = logging.getLogger(__name__)
 @dataclass
 class CalcTimes:
     """ Calculated Times """
-    def __init__(self):
-        self.utime = None
-        self.stime = None
-        self.rtime = None
-
     def get_elapsed(self, then):
         """ get elapsed times """
         now = os.times()
@@ -37,11 +32,6 @@ class CalcTimes:
 @dataclass
 class CmdOutput:
     """ Command return values """
-    def __init__(self):
-        self.rc = 0
-        self.stdout = None
-        self.stderr = None
-
     def get_result(self, returncode, output, error):
         """ use passed params """
         self.rc = returncode
@@ -141,9 +131,7 @@ def do_run():
         logger.info(f"Running task {int(task['id'])}: {task['command']}")
 
         if task['command'] == 'reload':
-            cout = CmdOutput()
-            ctim = CalcTimes()
-            db.set_finished(int(task['id']), task['command'], cout, ctim)
+            db.set_finished(int(task['id']), task['command'], None, None)
             db.commit()
             logger.info('Reloading Tasks.')
             sys.exit(0)
@@ -157,7 +145,7 @@ def do_run():
         try:
             output = run_command(task['command'])
             logger.debug(f"do_run: command: {task['command']}, output: {output}")
-            db.set_finished(int(task['id']),task['command'], output, ctim.get_elapsed(times))
+            db.set_finished(int(task['id']), task['command'], output, ctim.get_elapsed(times))
             logger.info(f"Task {int(task['id'])} finished.")
         except (ValueError, sqlite3.Error) as e:
             db.set_failed(int(task['id']), task['command'], str(e), ctim.get_elapsed(times))
