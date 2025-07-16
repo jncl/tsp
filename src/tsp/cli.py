@@ -149,13 +149,14 @@ def do_run():
         db.set_running(int(task['id']))
         db.commit()
 
+        start_time = os.times()
         try:
             output = run_command(task['command'])
-            logger.debug(f"do_run: command: {task['command']}, output: {output}")
-            db.set_finished(int(task['id']), task['command'], output, ctim.get_elapsed(os.times()))
+            logger.debug(f"do_run: command: {task['command']}, rc: {output.rc}")
+            db.set_finished(int(task['id']), task['command'], output, ctim.get_elapsed(start_time))
             logger.info(f"Task {int(task['id'])} finished.")
         except (ValueError, sqlite3.Error) as e:
-            db.set_failed(int(task['id']), task['command'], str(e), ctim.get_elapsed(os.times()))
+            db.set_failed(int(task['id']), task['command'], str(e), ctim.get_elapsed(start_time))
             logger.error(f"Task {int(task['id'])} failed: {e}.")
 
         db.commit()
