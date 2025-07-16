@@ -3,8 +3,11 @@ install: dist
 	./venv/bin/tsp --replace reload
 
 dist:
+	@[ -f /lib/systemd/system/tsp.service ] && sscs tsp.service
 	@[ -f ~/.local/share/tsp/tasks.db ] && rm ~/.local/share/tsp/tasks.db || true
-	@[ -f ./tsp.log ] && rm tsp.log || true
+	@[ -f /var/log/tsp/tsp.log ] && rm /var/log/tsp/tsp.log || true
+	@[ -f /lib/systemd/system/tsp.service ] && sscr tsp.service
+	@[ -f ./tsp.log ] && rm ./tsp.log || true
 	rm -rf dist
 	./venv/bin/python -m build --sdist --wheel
 	rm -rf src/tsp.egg-info build
