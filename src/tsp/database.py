@@ -235,7 +235,7 @@ class Database(DAL):
 
     def set_finished(self, task_id, command, coutput, ctime):
         """ set status to finished """
-        logger.debug(f"set_finished: [{task_id}], [{command}], [{coutput}], [{ctime}]")
+        logger.debug(f"set_finished: [{task_id}], [{command}], [{coutput.rc}], [{ctime.rtime}]")
 
         if not isinstance(task_id, int):
             logger.error('task_id must be an integer')

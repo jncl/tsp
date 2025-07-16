@@ -116,6 +116,7 @@ def do_run():
             logger.error('tsp daemon is already running', file=sys.stderr)
             sys.exit(1)
         else:
+            logger.error(f"do_run - get lock: {e}")
             raise
 
     db = Database()
@@ -339,8 +340,8 @@ def run_command(command):
     """ run command """
     command = command.split()
     command[0] = find_executable(command[0])
-    logger.debug(f"run_command - command: {command}")
+    logger.debug(f"run_command#1 - command: {command}")
     cout = CmdOutput()
     with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True) as p:
-        logger.debug(f"run_command#2: {p.returncode}")
+        logger.debug(f"run_command#2 - rc: {p.returncode}")
         return cout.get_result(p.returncode, *(p.communicate()))
