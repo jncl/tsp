@@ -8,7 +8,7 @@ install: dist
 
 dist:
 	@[ -f $(srvc_file) ] && (sudo systemctl stop tsp.service) || true
-	@[ -f $(db_file) ] && $(db_file) || true
+	@[ -f $(db_file) ] && rm $(db_file) || true
 	@[ -f $(log_file) ] && rm $(log_file) || true
 	@[ -f $(srvc_file) ] && (sudo systemctl start tsp.service) || true
 	@[ -f ./tsp.log ] && rm ./tsp.log || true
