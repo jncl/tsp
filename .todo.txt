@@ -1,1 +1,3 @@
 - [ ] Switch from sqlite3 to apsw.
+
+- [ ] Use Threads/Multiprocessing to run more than 1 command concurrently
