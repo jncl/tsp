@@ -102,7 +102,7 @@ def do_purge():
 
 def do_run():
     """
-        Runs scheduler process
+        Run scheduler process
 
         This should normally be done from a systemd unit
 
