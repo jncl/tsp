@@ -326,9 +326,12 @@ def print_task_list(tasks, count, header, no_header):
             else:
                 state = 'failed'
 
+            if not t['time_r'] is None:
+                times = f"{t['time_r']}/{t['time_u']}/{t['time_s']}"
+            else:
+                times = "None"
             print(str(t['id']).ljust(5, " "), state.ljust(10, " "), str(t['result']).ljust(8, " "),
-                str(t['time_r'] + "/" + t['time_u'] + "/" + t['time_s']).ljust(25, " ")
-                , t['command'].ljust(100," "))
+                times.ljust(25, " "), t['command'].ljust(100," "))
 
 
 def run_command(command):
