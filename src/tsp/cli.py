@@ -312,7 +312,8 @@ def print_task_list(tasks, count, header, no_header):
 
         # Original output from tsn
         # ID   State      Output               E-Level  Times(r/u/s)   Command [run=0/4]
-        print('ID   State      E-Level  Times(r/u/s)   Command')
+        print("ID".ljust(5, " "), "State" .ljust(10, " "), "E-Level".ljust(8, " "),
+            "Times(r/u/s)".ljust(25, " "), "Command".ljust(100," "))
 
         for t in tasks:
             logger.debug(f"Task entry: {t}")
@@ -325,7 +326,8 @@ def print_task_list(tasks, count, header, no_header):
             else:
                 state = 'failed'
 
-            print(f"{t['id']} {state} {t['result']} {t['time_r']}/{t['time_u']}/{t['time_s']} {t['command']}")
+            print(t['id'].ljust(5, " "), state.ljust(10, " "), t['result'].ljust(8, " "),
+                (t['time_r'] + "/" + t['time_u'] + "/" + t['time_s']).ljust(25, " "), t['command'].ljust(100," "))
 
 
 def run_command(command):
