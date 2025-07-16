@@ -342,4 +342,5 @@ def run_command(command):
     logger.debug(f"run_command - command: {command}")
     cout = CmdOutput()
     with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True) as p:
+        logger.debug(f"run_command#2: {p.returncode}")
         return cout.get_result(p.returncode, *(p.communicate()))
